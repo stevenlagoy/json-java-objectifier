@@ -1,0 +1,83 @@
+"data" : {
+    "characters" : {
+        "null" : null,
+        "booleans" : {
+            "true" : true,
+            "false" : false
+        },
+        "newline" : "line1\nline2",
+        "tab" : "column1\tcolumn2",
+        "carriage_return" : "return\rline",
+        "form_feed" : "page1\fpage2",
+        "backspace" : "text\bmore",
+        "back_slash" : "back\\slash",
+        "forward_slash" : "forward\/slash",
+        "unicode" : "unicode: \u00A9 \u00AE",
+        "quotes" : "\"quotated text\""
+    },
+    "integer" : 42,
+    "negative" : -17,
+    "float" : 3.14159,
+    "scientific" : 1.23E-4,
+    "zero" : 0,
+    "large_number" : 9.007199254740991E15,
+    "small_number" : 1.0E-10,
+    "max_integer" : 2147483647,
+    "min_integer" : -2147483648,
+    "}," : "",
+    "nested_arrays" : {
+        "[1, 2]",
+        "[3, [4, 5]]",
+        "[]"
+    },
+    "level1" : {
+        "level2" : {
+            "level3" : {
+                "single_line_array" : {
+                    ""multi_line_array" : [",
+                    1,
+                    "2, 3",
+                    4,
+                    "",
+                    "]",
+                    ""single_line_object" : {"key" : "value"}",
+                    ""mixed_array" : [",
+                    1,
+                    "string",
+                    null,
+                    true,
+                    "{"key" : "value"}",
+                    "[1, 2, 3]",
+                    "]",
+                    ""single_line_empty_object" : {}",
+                    ""multi_line_empty_object" : {",
+                    "",
+                    "",
+                    "",
+                    "}",
+                    ""single_line_empty_array" : []",
+                    ""multi_line_empty_array" : [",
+                    "",
+                    "",
+                    "",
+                    "]"
+                }
+            }
+        }
+    },
+    "strings" : {
+        "empty" : "",
+        "whitespace" : "  spaces  ",
+        "whitespace key" : "whitespace value",
+        "integer_as_string" : "123",
+        "float_as_string" : "2.71828",
+        "special_characters" : "!@#$%^&*()",
+        "unicode_strings" : {
+            "emojis" : "😀 🎉 🌟 🚀",
+            "mixed" : "Hello 👋 World 🌍",
+            "complex_emoji" : "👨‍👩‍👧‍👦",
+            "emoji_with_modifiers" : "👍🏽 👨🏻‍💻",
+            "international" : "Hello, 世界, مرحبًا, โลก, xin chào thế giới, Café"
+        }
+    }
+}

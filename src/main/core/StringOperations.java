@@ -1,5 +1,3 @@
-package src.main.core;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +39,32 @@ public class StringOperations {
             }
         }
         
+        // Add the remaining part after the last separator
+        if (lastSplitIndex <= string.length()) {
+            parts.add(string.substring(lastSplitIndex).trim());
+        }
+        
+        return parts.toArray(new String[0]);
+    }
+    public static String[] splitByUnquotedString(String string, String separator, int limit) {
+        List<String> parts = new ArrayList<>();
+        int lastSplitIndex = 0;
+        int count = 1; // always returns at least one string
+
+        for (int i = 0; i <= string.length() - separator.length() && count < limit; i++) {
+            // Check if this position contains the separator
+            if (string.startsWith(separator, i)) {
+                // Verify the separator is not in quotes
+                if (!isInString(string, i)) {
+                    // Add the part before this separator
+                    parts.add(string.substring(lastSplitIndex, i).trim());
+                    count++;
+                    lastSplitIndex = i + separator.length();
+                    i += separator.length() - 1; // Skip the rest of the separator
+                }
+            }
+        }
+
         // Add the remaining part after the last separator
         if (lastSplitIndex <= string.length()) {
             parts.add(string.substring(lastSplitIndex).trim());

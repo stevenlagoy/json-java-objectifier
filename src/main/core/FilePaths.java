@@ -1,7 +1,6 @@
-package src.main.core;
-
 import java.util.List;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class FilePaths {
     

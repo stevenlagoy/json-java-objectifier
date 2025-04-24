@@ -1,4 +1,3 @@
-package src.main.core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,35 +34,52 @@ public class FileOperations {
 
     public static class ScannerUtil {
         public static Scanner createScanner(InputStream inputStream) {
-            return new Scanner(inputStream, StandardCharsets.UTF_8.name());
+            return new Scanner(inputStream, StandardCharsets.UTF_8);
         }
-        public static Scanner createScanner(File file) throws FileNotFoundException {
-            return new Scanner(file, StandardCharsets.UTF_8.name());
+        public static Scanner createScanner(File file) throws IOException {
+            return new Scanner(file, StandardCharsets.UTF_8);
         }
     }
 
-    public static Set<String> listFiles(Path dir) throws IOException {
+    /**
+     * Returns a Set of Paths for all the files in the specified directory. 
+     * <p>Equivalent to {@link FileOperations#listFiles(Path, FileExtension) listFiles(dir, FileExtension.ALL)}
+     *
+     * @param dir The path to the directory to list the files within
+     * @return A Set of Paths to each file within the directory
+     * @throws IOException If the directory path is invalid or unable to be located
+     * @see FileExtension#ALL
+     */
+    public static Set<Path> listFiles(Path dir) throws IOException {
         try {
-            Set<String> fileSet = listFiles(dir, FileExtension.ALL);
-            return fileSet;
+            Set<Path> pathSet = listFiles(dir, FileExtension.ALL);
+            return pathSet;
         }
         catch (IOException e) {
             throw e;
         }
     }
 
-    public static Set<String> listFiles(Path dir, FileExtension extension) throws IOException {
-        Set<String> fileSet = new HashSet<>();
+    /**
+     * Returns a Set of Paths for all the files in the specificed directory with the given extension.
+     * 
+     * @param dir The path to the directory to list the files within.
+     * @param extension A FileOperations.FileExtension to filter the Path results by.
+     * @return A Set of Paths to each file within the directory with the extension.
+     * @throws IOException If the directory path is invalid or unable to be located.
+     */
+    public static Set<Path> listFiles(Path dir, FileExtension extension) throws IOException {
+        Set<Path> pathSet = new HashSet<>();
         dir = dir.normalize();
         if(!Files.exists(dir)) throw new IOException("The specified path, " + dir.toString() + ", was not found.");
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
                 String fileName = path.getFileName().toString();
                 if (!Files.isDirectory(path) && !FilePaths.IGNORED_FILES.contains(fileName) && fileName.endsWith(extension.getExtension())) {
-                    fileSet.add(fileName);
+                    pathSet.add(dir.resolve(fileName));
                 }
             }
-            return fileSet;
+            return pathSet;
         }
         catch (IOException e) {
             System.out.println("Error accessing directory: " + dir);
@@ -72,15 +88,14 @@ public class FileOperations {
     }
 
     public static void emptyFiles(Path dir, String extension) throws IOException {
-        Set<String> files = listFiles(dir); // does not include ignored files
-        for (String fileName : files) {
+        Set<Path> paths = listFiles(dir); // does not include ignored files
+        for (Path path : paths) {
             // Delete if extension matches or if wildcard
-            if (extension.equals("*") || fileName.endsWith(extension)) {
+            if (extension.equals("*") || path.toString().endsWith(extension)) {
                 try {
-                    Path path = dir.resolve(fileName);
                     Files.delete(path);
                 } catch (IOException e) {
-                    System.err.println("Failed to delete file: " + fileName);
+                    System.err.println("Failed to delete file: " + path.toString());
                     throw e;
                 }
             }
