@@ -77,8 +77,11 @@
         "float_as_string" : "2.71828",
         "special_characters" : "!@#$%^&*()",
         "unicode_strings" : {
-            "emojis" : "😀 🌟 🎉",
-            "international" : "Hello, 世界, Café"
+            "emojis": "😀 🎉 🌟 🚀",
+            "mixed": "Hello 👋 World 🌍",
+            "complex_emoji": "👨‍👩‍👧‍👦",
+            "emoji_with_modifiers": "👍🏽 👨🏻‍💻",
+            "international" : "Hello, 世界, مرحبًا, โลก, xin chào thế giới, Café"
         }
     }
 }
