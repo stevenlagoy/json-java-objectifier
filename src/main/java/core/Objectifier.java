@@ -1,7 +1,6 @@
-import java.io.FileWriter;
+package core;
+
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
@@ -9,33 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.Stack;
-import java.io.File;
 
 public class Objectifier {
-
-    public static void main(String[] args) {
-
-        System.setProperty("file.encoding", "UTF-8");
-        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
-
-        try {
-            Set<Path> paths = FileOperations.listFiles(FilePaths.DATA_SOURCE, FileOperations.FileExtension.JSON);
-            List<JSONObject> JSONs = new ArrayList<>();
-            for (Path path : paths) {
-                JSONs.add(objectify(path));
-            }
-            try (FileWriter fw = new FileWriter(new File("data/result.out"))) {
-                for (JSONObject JSON : JSONs) fw.write(JSON.toString());
-            }
-            
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 
     /**
      * Reads a JSON file and returns its contents as a List of Strings.
@@ -115,7 +90,8 @@ public class Objectifier {
 
         for (int i = 0; i < JSONContents.size(); i++) {
             String line = JSONContents.get(i).trim();
-            if (line.isEmpty() || line.equals("{") || line.equals("}")) continue;
+            if (line.isEmpty() || line.equals("{") || line.equals("}") || line.equals("},"))
+                continue;
             
             String key = "", valueString = "";
             try {
@@ -127,42 +103,49 @@ public class Objectifier {
                 continue;  // expected when the line is empty, contains just a key, just a colon, just a bracket, etc 
             }
 
+            if (key.equals("single_line_array"))
+                System.out.println("single_line_array");
+
             if (valueString.startsWith("{")) {
-                int start = i + 1, depth = 1;
+                int depth = 1;
                 List<String> subLines = new ArrayList<>();
                 while (++i < JSONContents.size() && depth > 0) {
                     String nestedLine = JSONContents.get(i);
                     if (StringOperations.containsUnquotedChar(nestedLine, '{')) depth++;
-                    if (StringOperations.containsUnquotedChar(nestedLine, '}')) depth--;
-                    if (depth > 0) subLines.add(nestedLine);
+                    if (StringOperations.containsUnquotedChar(nestedLine, '}')) {
+                        depth--;
+                        if (depth == 0) {
+                            i--;
+                            break;
+                        }
+                    }
+                    subLines.add(nestedLine);
                 }
                 children.add(objectify(key, subLines));
             }
             else if (valueString.startsWith("[")) {
-                List<Object> array = new ArrayList<>();
-                if (valueString.endsWith("]")) {
-                    String inner = valueString.substring(1, valueString.length() - 1).trim();
-                    if (!inner.isEmpty()) {
-                        String[] entries = StringOperations.splitByUnquotedString(inner, ",");
-                        for (String entry : entries) {
-                            array.add(parseValue(entry.trim()));
-                        }
-                    }
+                List<String> arrayLines = new ArrayList<>();
+                int depth = 0;
+            
+                // Add first line and update depth
+                arrayLines.add(valueString);
+                depth += StringOperations.countUnquotedChar(valueString, '[');
+                depth -= StringOperations.countUnquotedChar(valueString, ']');
+            
+                // Collect all lines of the array
+                while (depth > 0 && ++i < JSONContents.size()) {
+                    String arrayLine = JSONContents.get(i).trim();
+                    arrayLines.add(arrayLine);
+                    depth += StringOperations.countUnquotedChar(arrayLine, '[');
+                    depth -= StringOperations.countUnquotedChar(arrayLine, ']');
                 }
-                else {
-                    int depth = 1;
-                    List<String> subLines = new ArrayList<>();
-                    while (++i < JSONContents.size() && depth > 0) {
-                        String arrayLine = JSONContents.get(i).trim();
-                        if (StringOperations.containsUnquotedChar(arrayLine, '[')) depth++;
-                        if (StringOperations.containsUnquotedChar(arrayLine, ']')) depth--;
-                        if (depth > 0) subLines.add(arrayLine);
-                    }
-                    for (String entry : subLines) {
-                        array.add(parseValue(entry));
-                    }
-                }
-                children.add(new JSONObject(key, array));
+                
+                String fullArray = String.join(" ", arrayLines).trim();
+
+                @SuppressWarnings("unchecked")
+                List<Object> parsedArray = (List<Object>) parseValue(fullArray);
+
+                children.add(new JSONObject(key, parsedArray));
             }
             else if (valueString.equals("{"))
                 children.add(new JSONObject(key, new JSONObject(key)));
@@ -179,20 +162,57 @@ public class Objectifier {
 
     private static Object parseValue(String val) {
         val = val.replaceAll(",$", "").trim();
+
+        // Quoted strings
         if (val.startsWith("\"") && val.endsWith("\""))
             return val.substring(1, val.length() - 1);
+
+        // Null values
         if (val.equals("null"))
             return null;
+
+        // Boolean values
         if (val.equals("true") || val.equals("false"))
             return Boolean.parseBoolean(val);
+
+        // JSON Objects
+        if (val.startsWith("{") && val.endsWith("}")) {
+            return objectify("", List.of(val.substring(1, val.length()-1)));
+        }
+
+        // Arrays
+        if (val.startsWith("[") && val.endsWith("]")) {
+            val = val.substring(1, val.length() - 1).trim();
+            List<Object> list = new ArrayList<>();
+            if (!val.isEmpty()) {
+                String[] split = StringOperations.splitByStringNotInArray(val, ",");
+                for (String element : split) {
+                    list.add(parseValue(element));
+                }
+            }
+            return list;
+        }
+
+        // Integer values
         try {
             return Integer.parseInt(val);
         }
         catch (NumberFormatException e1) {}
+
+        // Long values
         try {
-            return Double.parseDouble(val); 
+            return Long.parseLong(val);
         }
         catch (NumberFormatException e2) {}
+
+        // Double values
+        try {
+            Double d = Double.parseDouble(val); 
+            if (Double.isFinite(d)) return d;
+        }
+        catch (NumberFormatException e3) {}
+
+        // Fallback with original value
         return val;
     }
 

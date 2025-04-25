@@ -1,3 +1,5 @@
+package core;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +14,29 @@ public class StringOperations {
         }
         return inString;
     }
+
+    public static boolean isInArray(String line, int position) {
+        int depth = 0;
+        for (int i = 0; i < position; i++) {
+            if (line.charAt(i) == '[' && !isInString(line, i-1))
+                depth++;
+            else if (line.charAt(i) == ']' && !isInString(line, i-1))
+                depth--;
+        }
+        return depth == 0 ? false : true;
+    }
     
     public static boolean containsUnquotedChar(String line, char target) {
+        return countUnquotedChar(line, target) > 0;
+    }
+
+    public static int countUnquotedChar(String line, char target) {
+        int count = 0;
         for (int i = 0; i < line.length(); i++) {
-            if (line.charAt(i) == target && !isInString(line, i)) {
-                return true;
-            }
+            if (line.charAt(i) == target && !isInString(line, i))
+                count++;
         }
-        return false;
+        return count;
     }
 
     public static String[] splitByUnquotedString(String string, String separator) {
@@ -65,6 +82,31 @@ public class StringOperations {
             }
         }
 
+        // Add the remaining part after the last separator
+        if (lastSplitIndex <= string.length()) {
+            parts.add(string.substring(lastSplitIndex).trim());
+        }
+        
+        return parts.toArray(new String[0]);
+    }
+
+    public static String[] splitByStringNotInArray(String string, String separator) {
+        List<String> parts = new ArrayList<>();
+        int lastSplitIndex = 0;
+        
+        for (int i = 0; i <= string.length() - separator.length(); i++) {
+            // Check if this position contains the separator
+            if (string.startsWith(separator, i)) {
+                // Verify the separator is not in brackets
+                if (!isInArray(string, i)) {
+                    // Add the part before this separator
+                    parts.add(string.substring(lastSplitIndex, i).trim());
+                    lastSplitIndex = i + separator.length();
+                    i += separator.length() - 1; // Skip the rest of the separator
+                }
+            }
+        }
+        
         // Add the remaining part after the last separator
         if (lastSplitIndex <= string.length()) {
             parts.add(string.substring(lastSplitIndex).trim());

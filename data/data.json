@@ -18,20 +18,33 @@
         }
     },
     "numbers" : {
-        "integer" : 42,
-        "negative" : -17,
-        "float" : 3.14159,
-        "scientific" : 1.23e-4,
         "zero" : 0,
-        "large_number" : 9007199254740991,
-        "small_number" : 1e-10,
-        "max_integer" : 2147483647,
-        "min_integer" : -2147483648
+        "negative_zero" : -0,
+        "small_int" : 42,
+        "negative_int" : -42,
+        "max_int" : 2147483647,
+        "min_int" : -2147483648,
+        "just_over_max_int" : 2147483648,
+        "just_under_min_int" : -2147483649,
+        "max_long" : 9223372036854775807,
+        "min_long" : -9223372036854775808,
+        "regular_double" : 3.14159,
+        "negative_double" : -3.14159,
+        "exponential_positive" : 1.2E10,
+        "exponential_negative" : -4.5E-5,
+        "double_max" : 1.7976931348623157e308,
+        "double_min" : 2.2250738585072014e-308
     },
     "nested_arrays" : [
         [1, 2],
         [3, [4, 5]],
-        []
+        [6, 
+            [7]],
+        [],
+        [[]],
+        [
+            []
+        ]
     ],
     "nested_objects" : {
         "level1" : {
@@ -44,7 +57,7 @@
                             4
 
                     ],
-                    "single_line_object" : {"key" : "value"},
+                    "single_line_object" : {"key1" : "value1", "key2" : {"key3" : "value2"}, "key3" : [false, "string"]},
                     "mixed_array" : [
                         1,
                         "string",
@@ -59,11 +72,23 @@
 
 
                     },
+                    "sinlge_line_nested_empty_objects" : { "empty" : {}},
+                    "multi_line_nested_empty_objects" : {
+                        "empty" : { "empty" : {
+
+                        }}
+                    },
                     "single_line_empty_array" : [],
                     "multi_line_empty_array" : [
 
 
 
+                    ],
+                    "single_line_nested_empty_arrays" : [[]],
+                    "multi_line_nested_empty_arrays" : [
+                        [[
+
+                        ]]
                     ]
                 }
             }
@@ -77,10 +102,10 @@
         "float_as_string" : "2.71828",
         "special_characters" : "!@#$%^&*()",
         "unicode_strings" : {
-            "emojis": "😀 🎉 🌟 🚀",
-            "mixed": "Hello 👋 World 🌍",
-            "complex_emoji": "👨‍👩‍👧‍👦",
-            "emoji_with_modifiers": "👍🏽 👨🏻‍💻",
+            "emojis" : "😀 🎉 🌟 🚀",
+            "mixed" : "Hello 👋 World 🌍",
+            "complex_emoji" : "👨‍👩‍👧‍👦",
+            "emoji_with_modifiers" : "👍🏽 👨🏻‍💻",
             "international" : "Hello, 世界, مرحبًا, โลก, xin chào thế giới, Café"
         }
     }

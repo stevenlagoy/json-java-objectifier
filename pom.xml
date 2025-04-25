@@ -33,7 +33,7 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/core</sourceDirectory>
+        <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -42,8 +42,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Objectifier</mainClass>
-                            <addClasspath>true</addClasspath>
+                            <mainClass>core.Tests</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -53,7 +52,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>Objectifier</mainClass>
+                    <mainClass>core.Tests</mainClass>
                 </configuration>
             </plugin>
         </plugins>
