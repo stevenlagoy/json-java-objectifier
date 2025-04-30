@@ -4,36 +4,96 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * A JSONObject is a custom data structure that represents a JSON object.
+ * It supports nested key-value pairs, arrays (as Lists), and primitive values
+ * such as strings, numbers, booleans, and null. This class provides methods
+ * for type casting, searching, and string representation.
+ */
 public class JSONObject implements Iterable<Object> {
 
-    public static final int SINGLE_LINE_ENTRIES_MAX = 5; // The maximum number of array entries which may be put on a single line in the string representation. Objects are expanded and count as three lines.
-    public static final int LINE_LENGTH_MAX = 55; // The maximum length of a line in string representation. An attempt will be made to split longer lines.
-    public static final String INDENT = "    "; // The string that will be used as indentation.
+    /** The maximum number of array entries which may be put on a single line in the string representation. Objects are expanded and count as at least three lines. */
+    public static final int SINGLE_LINE_ENTRIES_MAX = 5;
+    /** The maximum length of a line in string representation. Lines exceeding this length will be split. */
+    public static final int LINE_LENGTH_MAX = 55;
+    /** String used for indentation in formatted string output. */
+    public static final String INDENT = "    ";
 
+    /*
+     * Valid JSON types include:
+     * String:
+     *      "String"
+     *      ""
+     *      Any characters inside double quotes.
+     *      In Java, instance of java.lang.String
+     * Number:
+     *      10
+     *      4.2
+     *      1.5E2
+     *      Integer or Floating Point number, consisting of digits, at most one decimal place, and possibly E/e followed by an exponent.
+     *      In Java, instance of java.lang.Number (Integer, Long, Float, Double)
+     * Object:
+     *      {"key1" : "value", "key2 : "value"}
+     *      {}
+     *      A set of key-value pairs separated by commas inside curly braces.
+     *      In Java, instance of core.JSONObject
+     * Array:
+     *      ["value", 10, ...]
+     *      []
+     *      A list of bare values separated by commas inside square braces.
+     *      In Java, instance of java.util.List<?>
+     * Boolean:
+     *      true
+     *      false
+     *      Either true or false.
+     *      In Java, instance of java.lang.Boolean
+     * Null:
+     *      null
+     *      Represents nothing.
+     *      In Java, null
+     */
+
+    /**
+     * Checks whether an Object value is a valid JSON type: {@code String}, {@code Number}, {@code JSONObject}, {@code Array}, {@code Boolean}, or {@code null}.
+     * @param value The Object to check the type of.
+     * @return {@code true} if the Object is of a valid JSON type, otherwise {@code false}
+     */
     private static boolean isValidJsonType(Object value) {
         return (
-            value == null ||
             value instanceof String ||
             value instanceof Number ||
-            value instanceof Boolean ||
             value instanceof JSONObject ||
-            value instanceof List<?>
+            value instanceof List<?> ||
+            value instanceof Boolean ||
+            value == null
         );
     }
 
     private String key;
     private Object value;
 
+    /**
+     * Create an empty JSONObject instance with a key of {@code ""} and a value of {@code null}.
+     */
     public JSONObject() {
         this.key = "";
         this.value = null;
     }
 
+    /**
+     * Create a {@code JSONObject} with the given key and a value of {@code null}.
+     * @param key A {@code String} key
+     */
     public JSONObject(String key) {
         this.key = key;
         this.value = null;
     }
 
+    /**
+     * Create a {@code JSONObject} with the given key and value.
+     * @param key A {@code String} key
+     * @param value A valid JSON value
+     */
     public JSONObject(String key, Object value) {
         if (!isValidJsonType(value)) {
             throw new IllegalArgumentException("Invalid JSON value type.");
@@ -52,6 +112,12 @@ public class JSONObject implements Iterable<Object> {
     public Object getValue() {
         return value;
     }
+
+    /**
+     * Return the value as the given class.
+     * @param clazz An existant class to cast this object's value into.
+     * @return The value as a type of the given class, or null if uncastable.
+     */
     public <T> T getValueAs(Class<T> clazz) {
         try {
             return clazz.cast(value);
@@ -79,6 +145,11 @@ public class JSONObject implements Iterable<Object> {
     public List<?> getAsList() {
         return value instanceof List<?> ? (List<?>) value : null;
     }
+    /**
+     * Search the JSONObject tree structure for a JSONObject with the given key, and return the value of that JSONObject.
+     * @param key A String key to search for within the tree structure.
+     * @return The value of the JSONObject with the given key, or null if unfound.
+     */
     public Object get(String key) {
         if (this.key.equals(key))
             return this.value;
@@ -97,11 +168,21 @@ public class JSONObject implements Iterable<Object> {
         return null;
     }
 
+    /**
+     * Get the native type of the inner value of this JSONObject.
+     * @return The class of the value (String, Number, JSONObject, List<?>, Boolean, or null)
+     */
     public Class<?> getInnerType() {
         return value.getClass();
     }
 
-    // Iterator methods
+    // ITERATOR METHODS -------------------------------------------------------
+
+    /**
+     * Traverse the tree structure of this JSONObject inorder and return an indexable list of the objects' values.
+     * Start with the leftmost value, then the root value, then the rightmost value, recursively.
+     * @param result A List<Object> to be populated with the values from the inorder traversal.
+     */
     public void inorderTraversal(List<Object> result) {
         if (value == null) {
             result.add(null);
@@ -120,6 +201,9 @@ public class JSONObject implements Iterable<Object> {
         else result.add(value);
     }
 
+    /**
+     * Iterate through the tree structure of this JSONObject inorder
+     */
     @Override
     public Iterator<Object> iterator() {
         List<Object> traversal = new ArrayList<>();
@@ -128,18 +212,31 @@ public class JSONObject implements Iterable<Object> {
     }
 
     // Stringify methods
+
+    /**
+     * Turn this JSONObject into a String representation.
+     * Should result in a functionally identical String to the JSON object which was read to create this JSONObject.
+     * @return The String representation of this JSONObject
+     * @see JSONObject#toString(int)
+     */
     public String toString() {
         return toString(0);
     }
     
+    /**
+     * Turn this JSONObject into a String representation.
+     * Works recursively increasing the indentation with each recursion.
+     * @param indent The number of indentation steps to add to each line in the resulting String
+     * @return The String representation of this JSONObject, indented the given number of steps
+     * @see JSONObject#toString()
+     * @see JSONObject#INDENT
+     */
     private String toString(int indent) {
         StringBuilder sb = new StringBuilder();
         String indentation = INDENT.repeat(indent);
         
         if (!key.equals(""))
             sb.append(String.format("\"%s\" : ", this.key));
-        else
-            System.out.println("no key");
         
         if (value == null)
             sb.append("null");
@@ -210,14 +307,27 @@ public class JSONObject implements Iterable<Object> {
         return sb.toString();
     }
     
-    private String formatValue(Object val) {
+    /** 
+     * Format a value as it would appear within a JSON file.
+     * @param val An Object to format
+     * @return A String for the value properly formatted for JSON
+     */
+    private static String formatValue(Object val) {
         if (val == null) return "null";
         if (val instanceof String) return String.format("\"%s\"", val);
         if (val instanceof JSONObject) return val.toString();
         return val.toString();
     }
 
-    private int countInnerListEntries(List<?> list) {
+    /**
+     * Counts the number of items within the list, for use with formatting a String representation of a JSONObject.
+     * Most types count as 1 entry, while instances of inner JSONObjects count as 3. Inner Arrays will be recursively counted.
+     * @param list A list to count the number of entries within
+     * @return An int count of the list's recursive calculated size
+     * @see JSONObject#toString()
+     * @see JSONObject#SINGLE_LINE_ENTRIES_MAX
+     */
+    private static int countInnerListEntries(List<?> list) {
         int entries = 0;
         for (Object o : list) {
             if (o instanceof JSONObject) entries += 3;
@@ -228,6 +338,12 @@ public class JSONObject implements Iterable<Object> {
         return entries;
     }
 
+    /**
+     * Determine whether this JSONObect is equal to the other JSONObject by comparing their String representations.
+     * @param other A JSONObject with which to compare this JSONObject
+     * @return True if the String representations are the same, False otherwise
+     * @see JSONObject#toString()
+     */
     public boolean equals(JSONObject other) {
         return this.toString().equals(other.toString());
     }

@@ -54,9 +54,7 @@
                         },
                         [null, true]
                     ],
-                    "multi_line_array" : [
-                        [1, 2, 3, 4]
-                    ],
+                    "multi_line_array" : [1, 2, 3, 4],
                     "single_line_object" : {
                         "mixed_array" : [
                             1,

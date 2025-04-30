@@ -14,8 +14,8 @@ public class Objectifier {
 
     /**
      * Reads a JSON file and returns its contents as a List of Strings.
-     * @param filepath The path to a JSON file.
-     * @return A List of Strings where each entry is a line from the file.
+     * @param filepath The path to a JSON file
+     * @return A List of Strings where each entry is a line from the file
      */
     public static List<String> readJSONLines(Path filepath) {
         ArrayList<String> contents = new ArrayList<String>();
@@ -36,8 +36,9 @@ public class Objectifier {
 
     /**
      * Verifies that a JSON file is properly formatted. Keys must be unique strings, objects must be comma-separated, braces must be open-close matched.
-     * @param filepath The path to a JSON file.
-     * @return True if the file is properly formatted, False otherwise.
+     * @param filepath The path to a JSON file
+     * @return True if the file is properly formatted, False otherwise
+     * @see Objectifier#verifyJSONFile(List)
      */
     public static boolean verifyJSONFile(Path filepath) {
         List<String> contents = readJSONLines(filepath);
@@ -45,8 +46,8 @@ public class Objectifier {
     }
     /**
      * Verifies that a JSON String representation is properly formatted. Keys must be unique strings, objects must be comma-separated, braces must be open-close matched.
-     * @param contents A List of Strings representing the JSON file.
-     * @return True if the String representation is properly formatted, False otherwise.
+     * @param contents A List of Strings representing the JSON file
+     * @return True if the String representation is properly formatted, False otherwise
      */
     public static boolean verifyJSONFile(List<String> contents) {
         if (contents.size() == 0) return false; // JSON files must hold at least one object, so empty files are invalid.
@@ -72,6 +73,13 @@ public class Objectifier {
         return true; // No errors encountered: the JSON file is well-structured.
     }
 
+    /**
+     * Turns a JSON String List representation into a nested JSONObject. 
+     * @param JSONContents A List of Strings representing the JSON file
+     * @return A nested JSONObject parsed from the read JSON file, or null if the file is not valid JSON format
+     * @see Objectifier#objectify(String, List)
+     * @see Objectifier#verifyJSONFile(path)
+     */
     public static JSONObject objectify(Path path) {
         List<String> JSONContents = readJSONLines(path);
         String name = path.getFileName().toString().split("\\.")[0];
@@ -80,11 +88,15 @@ public class Objectifier {
     }
 
     /**
-     * Turns a JSON String List representation into a nested JSONObject. 
-     * @param JSONContents A List of Strings representing the JSON file.
-     * @return 
+     * Turns a JSON String List representation into a nested JSONObject.
+     * @param objectName A String to be used as the key for the returned JSONObject 
+     * @param JSONContents A List of Strings representing the JSON file
+     * @return A JSONObject with the given key and nested values parsed from the List of JSON lines, or null if the JSONContents are not valid JSON format
+     * @see Objectifier#verifyJSONFile(List)
      */
     public static JSONObject objectify(String objectName, List<String> JSONContents) {
+        if (!verifyJSONFile(JSONContents)) return null;
+
         JSONObject root = new JSONObject(objectName);
         List<JSONObject> children = new ArrayList<>();
 
@@ -160,6 +172,24 @@ public class Objectifier {
         return root;
     }
 
+    /**
+     * Interpret the value as a Java type.
+     * <ul>
+     * String -> java.lang.String
+     * <p>
+     * Number -> java.lang.Number
+     * <p>
+     * Object -> core.JSONObject
+     * <p>
+     * Array -> java.util.List&lt;?&gt;
+     * <p>
+     * Boolean -> java.lang.Boolean
+     * <p>
+     * null -> null
+     * </ul>
+     * @param val The String form of a valid JSON value
+     * @return An Object of the Java type matched to the JSON value's type. Returns the passed String if not mapped to another type.
+     */
     private static Object parseValue(String val) {
         val = val.replaceAll(",$", "").trim();
 
