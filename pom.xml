@@ -34,6 +34,7 @@
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/tests/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -42,7 +43,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>core.Tests</mainClass>
+                            <mainClass>src.tests.java.Tests</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -52,7 +53,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>core.Tests</mainClass>
+                    <mainClass>src.tests.java.Tests</mainClass>
                 </configuration>
             </plugin>
         </plugins>

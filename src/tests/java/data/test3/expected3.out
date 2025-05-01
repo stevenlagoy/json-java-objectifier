@@ -1,0 +1,35 @@
+"test3" : {
+    "strings" : {
+        "empty" : "",
+        "whitespace" : "  spaces  ",
+        "whitespace key" : "whitespace value",
+        "integer_as_string" : "123",
+        "float_as_string" : "2.71828",
+        "special_characters" : "!@#$%^&*()",
+        "key_containing_:_colon" : "value containing : colon",
+        "key_containing_{_openbrace" : "value containing { openbrace",
+        "key_containing_}_closebrace" : "value containing } closebrace",
+        "key_containing_{}_braces" : "value containing {} braces",
+        "key_looks_like_object :\" {}" : {
+            "actual_object" : "value looks like object \", {\"key\" : \"value\"}"
+        },
+        "unicode_strings" : {
+            "emojis" : "😀 🎉 🌟 🚀",
+            "mixed" : "Hello 👋 World 🌍",
+            "complex_emoji" : "👨‍👩‍👧‍👦",
+            "emoji_with_modifiers" : "👍🏽 👨🏻‍💻",
+            "international" : "Hello, 世界, مرحبًا, โลก, xin chào thế giới, Café"
+        }
+    },
+    "escape_sequences" : {
+        "newline" : "line1\nline2",
+        "tab" : "column1\tcolumn2",
+        "carriage_return" : "return\rline",
+        "form_feed" : "page1\fpage2",
+        "backspace" : "text\bmore",
+        "back_slash" : "back\\slash",
+        "forward_slash" : "forward\/slash",
+        "unicode" : "unicode: \u00A9 \u00AE",
+        "quotes" : "\"quotated text\""
+    }
+}

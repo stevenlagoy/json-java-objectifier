@@ -19,7 +19,10 @@ public class StringOperations {
      */
     public static boolean isInString(String line, int position) {
         boolean inString = false;
-        for (int i = 0; i < position; i++) {
+        for (int i = 0; i <= position; i++) {  // Changed <= to < to exclude current position
+            if (i == position && line.charAt(i) == '"' && (i == 0 || line.charAt(i-1) != '\\')) {
+                return false;
+            }
             if (line.charAt(i) == '"' && (i == 0 || line.charAt(i-1) != '\\')) {
                 inString = !inString;
             }
@@ -49,6 +52,18 @@ public class StringOperations {
         }
         return depth == 0 ? false : true;
     }
+
+    public static boolean isInObject(String line, int position) {
+        int depth = 0;
+        for (int i = 0; i < position; i++) {
+            char current = line.charAt(i);
+            if (line.charAt(i) == '{' && !isInString(line, i))
+                depth++;
+            else if (line.charAt(i) == '}' && !isInString(line, i))
+                depth--;
+        }
+        return depth == 0 ? false : true;
+    }
     
     /**
      * Checks if the given line contains at least one unquoted occurrence of the target character.
@@ -72,8 +87,8 @@ public class StringOperations {
      * <p>This method scans the string and increments a counter for each instance of the target character
      * that is not within a quoted string. Escaped quotes are correctly ignored.</p>
      *
-     * @param line The string to analyze.
-     * @param target The character to count.
+     * @param line The {@code string} to analyze.
+     * @param target The {@code char} to count.
      * @return The number of unquoted occurrences of the target character.
      * @see #isInString(String, int)
      */
@@ -84,6 +99,20 @@ public class StringOperations {
                 count++;
         }
         return count;
+    }
+
+    /**
+     * Finds the first instance of the target character outside of a string literal.
+     * @param line The {@code string} through which to search
+     * @param target The {@code char} to search for
+     * @return The index of the first unquoted instance of the target character, or {@code -1} if not found
+     * @see #isInString(String, int)
+     */
+    public static int findFirstUnquotedChar(String line, char target) {
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) == target && !isInString(line, i)) return i;
+        }
+        return -1;
     }
 
     /**
@@ -186,6 +215,62 @@ public class StringOperations {
             if (string.startsWith(separator, i)) {
                 // Verify the separator is not in brackets
                 if (!isInArray(string, i)) {
+                    // Add the part before this separator
+                    parts.add(string.substring(lastSplitIndex, i).trim());
+                    lastSplitIndex = i + separator.length();
+                    i += separator.length() - 1; // Skip the rest of the separator
+                }
+            }
+        }
+        
+        // Add the remaining part after the last separator
+        if (lastSplitIndex <= string.length()) {
+            parts.add(string.substring(lastSplitIndex).trim());
+        }
+        
+        return parts.toArray(new String[0]);
+    }
+
+    public static String[] splitByStringNotInObject(String string, String separator) {
+        List<String> parts = new ArrayList<>();
+        int lastSplitIndex = 0;
+        
+        for (int i = 0; i <= string.length() - separator.length(); i++) {
+            // Check if this position contains the separator
+            if (string.startsWith(separator, i)) {
+                // Verify the separator is not in brackets
+                if (!isInObject(string, i)) {
+                    // Add the part before this separator
+                    parts.add(string.substring(lastSplitIndex, i).trim());
+                    lastSplitIndex = i + separator.length();
+                    i += separator.length() - 1; // Skip the rest of the separator
+                }
+            }
+        }
+        
+        // Add the remaining part after the last separator
+        if (lastSplitIndex <= string.length()) {
+            parts.add(string.substring(lastSplitIndex).trim());
+        }
+        
+        return parts.toArray(new String[0]);
+    }
+
+    /**
+     * Splits a string by a separator only when it is not inside an object or an array.
+     * @param string
+     * @param separator
+     * @return
+     */
+    public static String[] splitByStringNotNested(String string, String separator) {
+        List<String> parts = new ArrayList<>();
+        int lastSplitIndex = 0;
+        
+        for (int i = 0; i <= string.length() - separator.length(); i++) {
+            // Check if this position contains the separator
+            if (string.startsWith(separator, i)) {
+                // Verify the separator is not in brackets
+                if (!isInObject(string, i) && !isInArray(string, i) && !isInString(string, i)) {
                     // Add the part before this separator
                     parts.add(string.substring(lastSplitIndex, i).trim());
                     lastSplitIndex = i + separator.length();

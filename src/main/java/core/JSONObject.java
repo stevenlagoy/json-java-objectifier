@@ -1,5 +1,6 @@
 package core;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +72,7 @@ public class JSONObject implements Iterable<Object> {
 
     private String key;
     private Object value;
+    private Class<? extends Object> type;
 
     /**
      * Create an empty JSONObject instance with a key of {@code ""} and a value of {@code null}.
@@ -78,6 +80,7 @@ public class JSONObject implements Iterable<Object> {
     public JSONObject() {
         this.key = "";
         this.value = null;
+        this.type = null;
     }
 
     /**
@@ -87,6 +90,7 @@ public class JSONObject implements Iterable<Object> {
     public JSONObject(String key) {
         this.key = key;
         this.value = null;
+        this.type = null;
     }
 
     /**
@@ -100,6 +104,23 @@ public class JSONObject implements Iterable<Object> {
         }
         this.key = key;
         this.value = value;
+        if (value == null) type = null;
+        else if (value instanceof List<?>)
+            if (isJSONList(getAsList())) type = JSONObject.class;
+            else type = ArrayList.class;
+        else type = value.getClass();
+    }
+
+    public JSONObject(String key, Object value, Class<? extends Object> type) {
+        this.key = key;
+        this.value = value;
+        this.type = type;
+    }
+
+    private boolean isJSONList(List<?> list) {
+        for (Object o : list)
+            if (!(o instanceof JSONObject)) return false;
+        return true;
     }
 
     public String getKey() {
@@ -127,9 +148,6 @@ public class JSONObject implements Iterable<Object> {
             return null;
         }
     }
-    public void setValue(Object value) {
-        this.value = value;
-    }
     public String getAsString() {
         return value instanceof String ? (String) value : null;
     }
@@ -145,6 +163,44 @@ public class JSONObject implements Iterable<Object> {
     public List<?> getAsList() {
         return value instanceof List<?> ? (List<?>) value : null;
     }
+    public void setValue(Object value) {
+        this.value = value;
+        if (value instanceof List<?> && !((List<?>) value).isEmpty()) {
+            // For non-empty lists, store the type of the first element
+            Object first = ((List<?>) value).get(0);
+            if (first instanceof JSONObject) {
+                this.type = JSONObject.class;
+            }
+            else {
+                this.type = value.getClass();
+            }
+        }
+        else {
+            this.type = value != null ? value.getClass() : null;
+        }
+
+    }
+    public void setValue(Object value, Class<? extends Object> type) {
+        this.value = value;
+        // Commented out because it is possible to have a mixed list
+        // Check that the type is correct
+        // if (value instanceof List<?>) {
+        //     List<?> list = (List<?>) value;
+        //     if (!list.isEmpty()) {
+        //         Object first = list.get(0);
+        //         if (first.getClass() != type)
+        //             throw new InvalidParameterException("The given type, " + type.getName() + ", does not match the actual type of the list entries, which is " + first.getClass().getName());
+        //     }
+        // }
+        this.type = type;
+    }
+    
+
+    /** Returns the type of the inner object, even if technically empty or null. */
+    public Class<? extends Object> getType() {
+        return type;
+    }
+
     /**
      * Search the JSONObject tree structure for a JSONObject with the given key, and return the value of that JSONObject.
      * @param key A String key to search for within the tree structure.
@@ -247,13 +303,19 @@ public class JSONObject implements Iterable<Object> {
         else if (value instanceof List<?>) {
             List<?> list = getAsList();
             if (list.isEmpty()) {
-                sb.append("[]");
+                if (type != null && JSONObject.class.isAssignableFrom(type))
+                    sb.append("{}");
+                else
+                    sb.append("[]");
             }
             else if (list.get(0) instanceof JSONObject) {
                 sb.append("{\n");
                 for (int i = 0; i < list.size(); i++) {
                     sb.append(indentation).append(INDENT);
                     JSONObject item = (JSONObject) list.get(i);
+                    if (item == null) {
+                        System.out.println("null");
+                    }
                     sb.append(item.toString(indent + 1));
                     if (i < list.size() - 1) sb.append(",");
                     sb.append("\n");
@@ -261,7 +323,6 @@ public class JSONObject implements Iterable<Object> {
                 sb.append(indentation).append("}");
             }
             else {
-                sb.append("[\n");
                 StringBuilder listStrB = new StringBuilder();
                 listStrB.append("[");
                 for (int i = 0; i < list.size(); i++) {
@@ -296,11 +357,14 @@ public class JSONObject implements Iterable<Object> {
                         }
                     }
                     // result = String.join(",\n", lines);
-                }
-                else result = indentation + INDENT + result;
 
-                sb.append(result);
-                sb.append("\n").append(indentation).append("]");
+                    sb.append("[\n").append(result).append("\n").append(indentation).append("]");
+                }
+                else {
+                    result = indentation + INDENT + result;
+                
+                    sb.append(result.trim());
+                }
             }
         }
         

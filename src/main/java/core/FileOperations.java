@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -99,6 +100,21 @@ public class FileOperations {
                     throw e;
                 }
             }
+        }
+    }
+
+    public static List<String> readFile(Path path) {
+        try {
+            Scanner scanner = ScannerUtil.createScanner(path.toFile());
+            List<String> result = new ArrayList<>();
+            while (scanner.hasNextLine()) {
+                result.add(scanner.nextLine());
+            }
+            return result;
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
