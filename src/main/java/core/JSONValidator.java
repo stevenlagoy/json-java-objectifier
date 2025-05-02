@@ -5,10 +5,39 @@ import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 public class JSONValidator {
     
+    /*
+     * JSON BNF Grammar
+     * <object>     ::= { } | { <members> }
+     * <members>    ::= <pair> | <pair> , <members>
+     * <pair>       ::= <string> : <value>
+     *                  semantics rule: <string> must be unique within its level
+     * 
+     * <array>      ::= [ ] | [ <elements> ]
+     * <elements>   ::= <value> | <value> , <elements>
+     * 
+     * <value>      ::= <string> | <number> | <object> | <array> | true | false | null
+     * 
+     * <string>     ::= " <characters> "
+     * <characters> ::= <character> | <character> <characters>
+     * <character>  ::= # any unicode character except " or \ or control characters # | \ <escape>
+     * 
+     * <escape>     ::= \" | \ | / | b | f | n | r | t | u <hex><hex><hex><hex>
+     * 
+     * <number>     ::= <int> <frac>? <exp>?
+     * <int>        ::= -? <digits>
+     * <frac>       ::= . <digits>
+     * <exp?        ::= (e | E) (+ | -)? <digits>
+     * <digits>     ::= <digit> | <digit> <digits>
+     * <digit>      ::= # digit from 0 to 9 #
+     * <hex>        ::= <digit> | [a-f] | [A-F]
+     */
+
     /**
      * Verifies that a JSON file is properly formatted. Keys must be unique strings, objects must be comma-separated, braces must be open-close matched.
      * @param filepath The path to a JSON file
@@ -153,5 +182,79 @@ public class JSONValidator {
         // If false, there is an opening brace/bracket unmatched to a closing brace/bracket.
         // If true, no errors encountered: the JSON file is well-structured.
     }
+    
+    /** Tracks the unique keys in the JSON tree structure. */
+    private static TreeSet<Set<String>> keys;
 
+    public static boolean validateJson(String jsonLine) {
+        return true;
+    }
+
+    public static boolean validateObject(String objectLine) {
+        return true;
+    }
+
+    public static boolean validateMembers(String membersLine) {
+        return true;
+    }
+
+    public static boolean validatePair(String pairLine) {
+        return true;
+    }
+
+    public static boolean validateArray(String arrayLine) {
+        return true;
+    }
+
+    public static boolean validateElements(String elementsLine) {
+        return true;
+    }
+
+    public static boolean validateValue(String valueLine) {
+        return true;
+    }
+
+    public static boolean validateString(String stringLine) {
+        return true;
+    }
+
+    public static boolean validateCharacters(String charactersLine) {
+        return true;
+    }
+
+    public static boolean validateCharacter(String characterLine) {
+        return true;
+    }
+
+    public static boolean validateEscape(String escapeLine) {
+        return true;
+    }
+
+    public static boolean validateNumber(String numberLine) {
+        return true;
+    }
+
+    public static boolean validateInt(String intLine) {
+        return true;
+    }
+
+    public static boolean validateFrac(String fracLine) {
+        return true;
+    }
+
+    public static boolean validateExp(String expLine) {
+        return true;
+    }
+
+    public static boolean validateDigits(String digitsLine) {
+        return true;
+    }
+
+    public static boolean validateDigit(String digitLine) {
+        return true;
+    }
+
+    public static boolean validateHex(String hexLine) {
+        return true;
+    }
 }
