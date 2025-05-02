@@ -1,145 +1,10 @@
 package core;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.EmptyStackException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Stack;
 
-public class Objectifier {
-
-    /**
-     * Reads a JSON file and returns its contents as a List of Strings.
-     * @param filepath The path to a JSON file
-     * @return A List of Strings where each entry is a line from the file
-     */
-    public static List<String> readJSONLines(Path filepath) {
-        ArrayList<String> contents = new ArrayList<String>();
-        try {
-            //String content = new String(Files.readAllBytes(filepath), StandardCharsets.UTF_8);
-            try(Scanner scanner = FileOperations.ScannerUtil.createScanner(filepath.toFile())) {
-                while (scanner.hasNextLine()) {
-                    contents.add(scanner.nextLine());
-                }
-            }
-            return contents;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Verifies that a JSON file is properly formatted. Keys must be unique strings, objects must be comma-separated, braces must be open-close matched.
-     * @param filepath The path to a JSON file
-     * @return True if the file is properly formatted, False otherwise
-     * @see Objectifier#verifyJSONFile(List)
-     */
-    public static boolean verifyJSONFile(Path filepath) {
-        List<String> contents = readJSONLines(filepath);
-        return verifyJSONFile(contents);
-    }
-    /**
-     * Verifies that a JSON String representation is properly formatted. Keys must be unique strings, objects must be comma-separated, braces must be open-close matched.
-     * @param contents A List of Strings representing the JSON file
-     * @return True if the String representation is properly formatted, False otherwise
-     */
-    public static boolean verifyJSONFile(List<String> contents) {
-        if (contents.size() == 0)
-            return false; // JSON files must hold at least one object, so empty files are invalid.
-        Stack<Integer> stack = new Stack<>();
-        Stack<Character> structureStack = new Stack<>();
-        Map<Integer, Integer> indices = new HashMap<>();
-        boolean firstObjectEntry = false;
-
-        for (int i = 0; i < contents.size(); i++) {
-            String line = contents.get(i).trim();
-            if (line == null || line.isEmpty()) continue;
-
-            // Opening structural characters
-            if (StringOperations.containsUnquotedChar(line, '{') || StringOperations.containsUnquotedChar(line, '[')) {
-                if (StringOperations.containsUnquotedChar(line, '{')) {
-                    stack.push(i);
-                    structureStack.push('{');
-                    firstObjectEntry = true;
-                }
-                if (StringOperations.containsUnquotedChar(line, '[')) {
-                    structureStack.push('[');
-                }
-                continue;
-            }
-
-            // Closing structural characters
-            if (StringOperations.containsUnquotedChar(line, '}') || StringOperations.containsUnquotedChar(line, ']')) {
-                if (StringOperations.containsUnquotedChar(line, '}')) {
-                    try {
-                        indices.put(stack.pop(), i);
-                        if (!structureStack.isEmpty() && structureStack.peek() == '{') {
-                            structureStack.pop();
-                        }
-                        else
-                            return false; // Mismatched braces
-                    }
-                    catch (EmptyStackException e) {
-                        return false;
-                    }
-                }
-                if (StringOperations.containsUnquotedChar(line, ']')) {
-                    if (!structureStack.isEmpty() && structureStack.peek() == '[') {
-                        structureStack.pop();
-                    }
-                    else
-                        return false; // Mismatched braces
-                }
-                continue;
-            }
-
-            // Check format based on current context
-            if (!structureStack.isEmpty() && structureStack.peek() == '{') {
-                // Inside an object
-                if (!StringOperations.containsUnquotedChar(line, ':')) {
-                    return false; // Objects must have a key-value pair
-                }
-                // Validate key format
-                String[] parts = StringOperations.splitByUnquotedString(line, ":", 2);
-                String key = parts[0].trim();
-                if (!key.startsWith("\"") || !key.endsWith("\"")) {
-                    return false; // The key must be quoted
-                }
-            }
-            
-            // Check for missing or misplaced commas
-            boolean hasComma = line.endsWith(",");
-            String nextLine = null;
-            for (int j = i + 1; j < contents.size(); j++) {
-                String next = contents.get(j).trim();
-                if (!next.isEmpty()) {
-                    nextLine = next;
-                    break;
-                }
-            }
-            if (firstObjectEntry) {
-                if (hasComma && (nextLine == null || nextLine.equals("}"))) {
-                    return false; // Trailing comma after last entry is invalid
-                }
-            }
-            else {
-                if (!line.endsWith("{") && !hasComma && nextLine != null && !(nextLine.equals("}") || nextLine.equals("},"))) {
-                    return false; // Missing comma between entries
-                }
-            }
-
-            firstObjectEntry = false;
-        }
-        return stack.isEmpty() && structureStack.isEmpty();
-        // If false, there is an opening brace/bracket unmatched to a closing brace/bracket.
-        // If true, no errors encountered: the JSON file is well-structured.
-    }
+public class JSONObjectifier {
 
     /**
      * Turns a JSON String List representation into a nested JSONObject. 
@@ -149,9 +14,9 @@ public class Objectifier {
      * @see Objectifier#verifyJSONFile(path)
      */
     public static JSONObject objectify(Path path) {
-        List<String> JSONContents = readJSONLines(path);
+        List<String> JSONContents = JSONReader.readLines(path);
         String name = path.getFileName().toString().split("\\.")[0];
-        if (!verifyJSONFile(JSONContents)) return null;
+        if (!JSONValidator.validate(JSONContents)) return null;
         return objectify(name, JSONContents);
     }
 

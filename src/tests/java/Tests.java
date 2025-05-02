@@ -14,16 +14,41 @@ import org.junit.Test;
 
 import core.FileOperations;
 import core.JSONObject;
-import core.Objectifier;
+import core.JSONObjectifier;
+import core.JSONValidator;
 
 public class Tests {
     
+    @Test
+    public void testJSONValidityChecker() {
+        Path[] dataPaths = {
+            Path.of("src\\tests\\java\\data\\test1\\test1.json"),
+            Path.of("src\\tests\\java\\data\\test2\\test2.json"),
+            Path.of("src\\tests\\java\\data\\test3\\test3.json"),
+            Path.of("src\\tests\\java\\data\\test4\\test4.json"),
+            Path.of("src\\tests\\java\\data\\test5\\test5.json"),
+            Path.of("src\\tests\\java\\data\\test6\\invalid0.json"),
+            Path.of("src\\tests\\java\\data\\test6\\invalid1.json"),
+            Path.of("src\\tests\\java\\data\\test6\\invalid2.json"),
+            Path.of("src\\tests\\java\\data\\test6\\invalid3.json")
+        };
+        assertTrue(JSONValidator.validate(dataPaths[0]));
+        assertTrue(JSONValidator.validate(dataPaths[1]));
+        assertTrue(JSONValidator.validate(dataPaths[2]));
+        assertTrue(JSONValidator.validate(dataPaths[3]));
+        assertTrue(JSONValidator.validate(dataPaths[4]));
+        assertFalse(JSONValidator.validate(dataPaths[5]));
+        assertFalse(JSONValidator.validate(dataPaths[6]));
+        assertFalse(JSONValidator.validate(dataPaths[7]));
+        assertFalse(JSONValidator.validate(dataPaths[8]));
+    }
+
     @Test
     public void objectifyNumbers() {
         Path dataPath = Path.of("src\\tests\\java\\data\\test1\\test1.json");
         Path expectedPath = Path.of("src\\tests\\java\\data\\test1\\expected1.out");
         String expected = String.join("\n", FileOperations.readFile(expectedPath));
-        String actual = Objectifier.objectify(dataPath).toString();
+        String actual = JSONObjectifier.objectify(dataPath).toString();
         assertEquals(expected, actual);
     }
 
@@ -32,7 +57,7 @@ public class Tests {
         Path dataPath = Path.of("src\\tests\\java\\data\\test2\\test2.json");
         Path expectedPath = Path.of("src\\tests\\java\\data\\test2\\expected2.out");
         String expected = String.join("\n", FileOperations.readFile(expectedPath));
-        String actual = Objectifier.objectify(dataPath).toString();
+        String actual = JSONObjectifier.objectify(dataPath).toString();
         assertEquals(expected, actual);
     }
 
@@ -41,7 +66,7 @@ public class Tests {
         Path dataPath = Path.of("src\\tests\\java\\data\\test3\\test3.json");
         Path expectedPath = Path.of("src\\tests\\java\\data\\test3\\expected3.out");
         String expected = String.join("\n", FileOperations.readFile(expectedPath));
-        String actual = Objectifier.objectify(dataPath).toString();
+        String actual = JSONObjectifier.objectify(dataPath).toString();
         assertEquals(expected, actual);
     }
 
@@ -50,7 +75,7 @@ public class Tests {
         Path dataPath = Path.of("src\\tests\\java\\data\\test4\\test4.json");
         Path expectedPath = Path.of("src\\tests\\java\\data\\test4\\expected4.out");
         String expected = String.join("\n", FileOperations.readFile(expectedPath));
-        String actual = Objectifier.objectify(dataPath).toString();
+        String actual = JSONObjectifier.objectify(dataPath).toString();
         assertEquals(expected, actual);
     }
 
@@ -59,7 +84,7 @@ public class Tests {
         Path dataPath = Path.of("src\\tests\\java\\data\\test5\\test5.json");
         Path expectedPath = Path.of("src\\tests\\java\\data\\test5\\expected5.out");
         String expected = String.join("\n", FileOperations.readFile(expectedPath));
-        String actual = Objectifier.objectify(dataPath).toString();
+        String actual = JSONObjectifier.objectify(dataPath).toString();
         assertEquals(expected, actual);
     }
 
@@ -124,37 +149,13 @@ public class Tests {
     }
 
     @Test
-    public void testJSONValidityChecker() {
-        Path[] dataPaths = {
-            Path.of("src\\tests\\java\\data\\test1\\test1.json"),
-            Path.of("src\\tests\\java\\data\\test2\\test2.json"),
-            Path.of("src\\tests\\java\\data\\test3\\test3.json"),
-            Path.of("src\\tests\\java\\data\\test4\\test4.json"),
-            Path.of("src\\tests\\java\\data\\test5\\test5.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid0.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid1.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid2.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid3.json")
-        };
-        assertTrue(Objectifier.verifyJSONFile(dataPaths[0]));
-        assertTrue(Objectifier.verifyJSONFile(dataPaths[1]));
-        assertTrue(Objectifier.verifyJSONFile(dataPaths[2]));
-        assertTrue(Objectifier.verifyJSONFile(dataPaths[3]));
-        assertTrue(Objectifier.verifyJSONFile(dataPaths[4]));
-        assertFalse(Objectifier.verifyJSONFile(dataPaths[5]));
-        assertFalse(Objectifier.verifyJSONFile(dataPaths[6]));
-        assertFalse(Objectifier.verifyJSONFile(dataPaths[7]));
-        assertFalse(Objectifier.verifyJSONFile(dataPaths[8]));
-    }
-
-    @Test
     public void testJSONValidationWithInvalidKeys() {
         List<String> invalidKey = Arrays.asList(
             "{",
             "    key: \"value\"",  // key not quoted
             "}"
         );
-        assertFalse(Objectifier.verifyJSONFile(invalidKey));
+        assertFalse(JSONValidator.validate(invalidKey));
     }
 
     @Test
@@ -165,7 +166,7 @@ public class Tests {
             "    \"key2\": \"value2\"",
             "}"
         );
-        assertFalse(Objectifier.verifyJSONFile(missingComma));
+        assertFalse(JSONValidator.validate(missingComma));
     }
 
     @Test
@@ -176,7 +177,7 @@ public class Tests {
             "    \"key2\": \"value2\",",  // extra comma
             "}"
         );
-        assertFalse(Objectifier.verifyJSONFile(extraComma));
+        assertFalse(JSONValidator.validate(extraComma));
     }
 
     @Test
@@ -190,6 +191,6 @@ public class Tests {
             "    \"key3\": \"value3\"       ",
             "}                              "
         );
-        assertTrue(Objectifier.verifyJSONFile(valid));
+        assertTrue(JSONValidator.validate(valid));
     }
 }
