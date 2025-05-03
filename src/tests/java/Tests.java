@@ -1,4 +1,5 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -13,8 +14,12 @@ public class Tests {
     @Test
     public void testNumbers() {
         String expected = String.join("\n", FileOperations.readFile(Path.of("src\\tests\\java\\data\\test1\\expected1.out")));
-        String actual = JSONProcessor.processJson(Path.of("src\\tests\\java\\data\\test1\\test1.json")).toString();
-        assertEquals(expected, actual);
+        assertNotNull("Expected file content should not be null", expected);
+        
+        String result = JSONProcessor.processJson(Path.of("src\\tests\\java\\data\\test1\\test1.json")).toString();
+        assertNotNull("Processed JSON should not be null", result);
+        
+        assertEquals(expected, result);
     }
 
     @Test

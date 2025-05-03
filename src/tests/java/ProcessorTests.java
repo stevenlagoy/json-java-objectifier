@@ -19,9 +19,12 @@ public class ProcessorTests {
         assertEquals("", JSONProcessor.processValue("\"\""));
         
         // Test numbers
-        assertEquals(42.0, (double) JSONProcessor.processValue("42"), 0.001);
-        assertEquals(-3.14, (double) JSONProcessor.processValue("-3.14"), 0.001);
-        assertEquals(1.23e-4, (double) JSONProcessor.processValue("1.23e-4"), 0.00001);
+        Number num = (Number)JSONProcessor.processValue("42");
+        assertEquals(42, num.intValue());
+        num = (Number)JSONProcessor.processValue("-3.14");
+        assertEquals(-3.14, num.doubleValue(), 0.001);
+        num = (Number)JSONProcessor.processValue("1.23e-4");
+        assertEquals(1.23e-4, num.doubleValue(), 0.00001);
         
         // Test booleans
         assertEquals(Boolean.TRUE, JSONProcessor.processValue("true"));
@@ -61,12 +64,16 @@ public class ProcessorTests {
     @Test
     public void testProcessNumber() {
         // Test integers
-        assertEquals(42.0, (double) JSONProcessor.processNumber("42"), 0.001);
-        assertEquals(-42.0, (double) JSONProcessor.processNumber("-42"), 0.001);
+        Number num = JSONProcessor.processNumber("42");
+        assertEquals(42, num.intValue());
+        num = JSONProcessor.processNumber("-42");
+        assertEquals(-42, num.intValue());
         
         // Test decimals
-        assertEquals(3.14, (double) JSONProcessor.processNumber("3.14"), 0.001);
-        assertEquals(-3.14, (double) JSONProcessor.processNumber("-3.14"), 0.001);
+        num = JSONProcessor.processNumber("3.14");
+        assertEquals(3.14, num.doubleValue(), 0.001);
+        num = JSONProcessor.processNumber("-3.14");
+        assertEquals(-3.14, num.doubleValue(), 0.001);
         
         // Test scientific notation
         assertEquals(1.23e-4, (double) JSONProcessor.processNumber("1.23e-4"), 0.00001);
@@ -88,7 +95,8 @@ public class ProcessorTests {
         // Test simple array
         List<Object> numbers = JSONProcessor.processArray("[1,2,3]");
         assertEquals(3, numbers.size());
-        assertEquals(1.0, numbers.get(0));
+        Number num = (Number)numbers.get(0);
+        assertEquals(1, num.intValue());
         
         // Test mixed array
         List<Object> mixed = JSONProcessor.processArray("[1,\"two\",true]");
