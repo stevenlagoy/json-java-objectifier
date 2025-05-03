@@ -3,7 +3,7 @@ package core;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.HashSet;
 
 public class JSONValidator {
     
@@ -114,7 +114,7 @@ public class JSONValidator {
         membersLine = membersLine.trim();
         if (membersLine.isEmpty()) return false;
 
-        Set<String> keys = new TreeSet();
+        Set<String> keys = new HashSet();
         String[] members = StringOperations.splitByStringNotNested(membersLine, ",");
         
         for (String pair : members) {

@@ -38,7 +38,7 @@ public class JSONProcessor {
 
     public static JSONObject processJson(Path path) {
         List<String> contents = FileOperations.readFile(path);
-        String key = path.getFileName().toString();
+        String key = path.getFileName().toString().split("\\.")[0];
         return processJson(key, contents);
     }
 
@@ -225,7 +225,7 @@ public class JSONProcessor {
         if (valueLine.equals("null")) return new Object();
         String processedString = processString(valueLine);
         if (processedString != null) return processedString;
-        Double processedNumber = processNumber(valueLine);
+        Number processedNumber = processNumber(valueLine);
         if (processedNumber != null) return processedNumber;
         List<JSONObject> processedObject = processObject(valueLine);
         if (processedObject != null) return processedObject;
@@ -368,7 +368,7 @@ public class JSONProcessor {
      * @param numberLine The line contining the full number to process (must not be null or empty or blank)
      * @return {@code true} if the number is successfully processed, {@code false} otherwise
      */
-    public static Double processNumber(String numberLine) {
+    public static Number processNumber(String numberLine) {
         if (numberLine == null) return null;
         numberLine = numberLine.trim().toUpperCase();
         if (numberLine.isEmpty()) return null;
@@ -385,20 +385,30 @@ public class JSONProcessor {
         Integer processedInt = processInt(numberLine.substring(beginInt, endInt));
         if (processedInt == null) return null;
         // Parse fraction part
-        if (beginFrac != -1) {
+        if (beginFrac != -1 && beginFrac < endFrac) {
             Double processedFrac = processFrac(numberLine.substring(beginFrac, endFrac));
             if (processedFrac == null) return null;
         }
         // Parse exponent part
-        if (beginExp != -1) {
+        if (beginExp != -1 && beginExp < endExp) {
             Integer processedExp = processExp(numberLine.substring(beginExp, endExp));
             if (processedExp == null) return null;
         }
         try {
-            return Double.valueOf(numberLine);
+            return Integer.valueOf(numberLine);
         }
-        catch (NumberFormatException e) {
-            return null;
+        catch (NumberFormatException e1) {
+            try {
+                return Long.valueOf(numberLine);
+            }
+            catch (NumberFormatException e2) {
+                try {
+                    return Double.valueOf(numberLine);
+                }
+                catch (NumberFormatException e3) {
+                    return null;
+                }
+            }
         }
     }
 

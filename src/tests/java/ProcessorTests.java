@@ -1,13 +1,11 @@
-// package src.tests.java;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
 import org.junit.Test;
+
+import java.util.List;
 
 import core.JSONObject;
 import core.JSONProcessor;
@@ -63,16 +61,16 @@ public class ProcessorTests {
     @Test
     public void testProcessNumber() {
         // Test integers
-        assertEquals(42.0, JSONProcessor.processNumber("42"), 0.001);
-        assertEquals(-42.0, JSONProcessor.processNumber("-42"), 0.001);
+        assertEquals(42.0, (double) JSONProcessor.processNumber("42"), 0.001);
+        assertEquals(-42.0, (double) JSONProcessor.processNumber("-42"), 0.001);
         
         // Test decimals
-        assertEquals(3.14, JSONProcessor.processNumber("3.14"), 0.001);
-        assertEquals(-3.14, JSONProcessor.processNumber("-3.14"), 0.001);
+        assertEquals(3.14, (double) JSONProcessor.processNumber("3.14"), 0.001);
+        assertEquals(-3.14, (double) JSONProcessor.processNumber("-3.14"), 0.001);
         
         // Test scientific notation
-        assertEquals(1.23e-4, JSONProcessor.processNumber("1.23e-4"), 0.00001);
-        assertEquals(1.23E4, JSONProcessor.processNumber("1.23E4"), 0.001);
+        assertEquals(1.23e-4, (double) JSONProcessor.processNumber("1.23e-4"), 0.00001);
+        assertEquals(1.23E4, (double) JSONProcessor.processNumber("1.23E4"), 0.001);
         
         // Test invalid numbers
         assertNull(JSONProcessor.processNumber("abc"));
