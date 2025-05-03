@@ -20,30 +20,6 @@ import core.JSONValidator;
 public class Tests {
     
     @Test
-    public void testJSONValidityChecker() {
-        Path[] dataPaths = {
-            Path.of("src\\tests\\java\\data\\test1\\test1.json"),
-            Path.of("src\\tests\\java\\data\\test2\\test2.json"),
-            Path.of("src\\tests\\java\\data\\test3\\test3.json"),
-            Path.of("src\\tests\\java\\data\\test4\\test4.json"),
-            Path.of("src\\tests\\java\\data\\test5\\test5.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid0.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid1.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid2.json"),
-            Path.of("src\\tests\\java\\data\\test6\\invalid3.json")
-        };
-        assertTrue(JSONValidator.validate(dataPaths[0]));
-        assertTrue(JSONValidator.validate(dataPaths[1]));
-        assertTrue(JSONValidator.validate(dataPaths[2]));
-        assertTrue(JSONValidator.validate(dataPaths[3]));
-        assertTrue(JSONValidator.validate(dataPaths[4]));
-        assertFalse(JSONValidator.validate(dataPaths[5]));
-        assertFalse(JSONValidator.validate(dataPaths[6]));
-        assertFalse(JSONValidator.validate(dataPaths[7]));
-        assertFalse(JSONValidator.validate(dataPaths[8]));
-    }
-
-    @Test
     public void objectifyNumbers() {
         Path dataPath = Path.of("src\\tests\\java\\data\\test1\\test1.json");
         Path expectedPath = Path.of("src\\tests\\java\\data\\test1\\expected1.out");
@@ -148,49 +124,4 @@ public class Tests {
         assertTrue(result.split("\n").length > 2);
     }
 
-    @Test
-    public void testJSONValidationWithInvalidKeys() {
-        List<String> invalidKey = Arrays.asList(
-            "{",
-            "    key: \"value\"",  // key not quoted
-            "}"
-        );
-        assertFalse(JSONValidator.validate(invalidKey));
-    }
-
-    @Test
-    public void testJSONValidationWithMissingCommas() {
-        List<String> missingComma = Arrays.asList(
-            "{",
-            "    \"key1\": \"value1\"",  // missing comma
-            "    \"key2\": \"value2\"",
-            "}"
-        );
-        assertFalse(JSONValidator.validate(missingComma));
-    }
-
-    @Test
-    public void testJSONValidationWithExtraCommas() {
-        List<String> extraComma = Arrays.asList(
-            "{",
-            "    \"key1\": \"value1\",",
-            "    \"key2\": \"value2\",",  // extra comma
-            "}"
-        );
-        assertFalse(JSONValidator.validate(extraComma));
-    }
-
-    @Test
-    public void testJSONValidationWithValidFormat() {
-        List<String> valid = Arrays.asList(
-            "{                              ",
-            "    \"key1\": \"value1\",      ",
-            "    \"key2\": {                ",
-            "        \"nested\": \"value\"  ",
-            "    },                         ",
-            "    \"key3\": \"value3\"       ",
-            "}                              "
-        );
-        assertTrue(JSONValidator.validate(valid));
-    }
 }

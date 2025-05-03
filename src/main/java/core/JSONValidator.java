@@ -1,18 +1,17 @@
 package core;
 
 import java.nio.file.Path;
-import java.util.EmptyStackException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeSet;
 
 public class JSONValidator {
     
     /*
      * JSON BNF Grammar
+     * <json>       ::= <value>
+     * <value>      ::= <string> | <number> | <object> | <array> | true | false | null
+     * 
      * <object>     ::= { } | { <members> }
      * <members>    ::= <pair> | <pair> , <members>
      * <pair>       ::= <string> : <value>
@@ -21,240 +20,456 @@ public class JSONValidator {
      * <array>      ::= [ ] | [ <elements> ]
      * <elements>   ::= <value> | <value> , <elements>
      * 
-     * <value>      ::= <string> | <number> | <object> | <array> | true | false | null
-     * 
      * <string>     ::= " <characters> "
      * <characters> ::= <character> | <character> <characters>
-     * <character>  ::= # any unicode character except " or \ or control characters # | \ <escape>
+     * <character>  ::= # any unicode character except " or \ or control characters # | <escape>
      * 
-     * <escape>     ::= \" | \ | / | b | f | n | r | t | u <hex><hex><hex><hex>
+     * <escape>     ::= \ (" | \ | / | b | f | n | r | t | u <hex><hex><hex><hex>)
      * 
      * <number>     ::= <int> <frac>? <exp>?
      * <int>        ::= -? <digits>
      * <frac>       ::= . <digits>
-     * <exp?        ::= (e | E) (+ | -)? <digits>
+     * <exp>        ::= (e | E) (+ | -)? <digits>
      * <digits>     ::= <digit> | <digit> <digits>
      * <digit>      ::= # digit from 0 to 9 #
      * <hex>        ::= <digit> | [a-f] | [A-F]
      */
 
-    /**
-     * Verifies that a JSON file is properly formatted. Keys must be unique strings, objects must be comma-separated, braces must be open-close matched.
-     * @param filepath The path to a JSON file
-     * @return True if the file is properly formatted, False otherwise
-     * @see Objectifier#verifyJSONFile(List)
-     */
-    public static boolean validate(Path filepath) {
-        List<String> contents = JSONReader.readLines(filepath);
-        return validate(contents);
+    public static boolean validateJson(Path path) {
+        List<String> contents = FileOperations.readFile(path);
+        return validateJson(contents);
     }
-    /**
-     * Verifies that a JSON String representation is properly formatted. Keys must be unique strings, objects must be comma-separated, braces must be open-close matched.
-     * @param contents A List of Strings representing the JSON file
-     * @return True if the String representation is properly formatted, False otherwise
-     */
-    public static boolean validate(List<String> contents) {
-        if (contents.size() == 0)
-            return false; // JSON files must hold at least one object, so empty files are invalid.
-        Stack<Integer> stack = new Stack<>();
-        Stack<Character> structureStack = new Stack<>();
-        Map<Integer, Integer> indices = new HashMap<>();
-        boolean firstObjectEntry = false;
 
-        for (int i = 0; i < contents.size(); i++) {
-            String line = contents.get(i).trim();
-            if (line == null || line.isEmpty()) continue;
-            boolean hasStructuralChars = false;
-
-            // Opening structural characters
-            if (!hasStructuralChars && (StringOperations.containsUnquotedChar(line, '{') || StringOperations.containsUnquotedChar(line, '['))) {
-                hasStructuralChars = true;
-                int openBraces = StringOperations.countUnquotedChar(line, '{');
-                int closeBraces = StringOperations.countUnquotedChar(line, '}');
-                int openBrackets = StringOperations.countUnquotedChar(line, '[');
-                int closeBrackets = StringOperations.countUnquotedChar(line, ']');
-
-                // Must be in this order: Open Braces, Close Braces, Open Brackets, Close Brackets
-
-                for (int j = 0; j < openBraces; j++) {
-                    stack.push(i);
-                    structureStack.push('{');
-                    firstObjectEntry = true;
-                }
-
-                for (int j = 0; j < closeBraces; j++) {
-                    try {
-                        indices.put(stack.pop(), i);
-                        if (!structureStack.isEmpty() && structureStack.peek() == '{') {
-                            structureStack.pop();
-                        }
-                        else return false; // Mismatched braces
-                    }
-                    catch (EmptyStackException e) {
-                        return false;
-                    }
-                }
-
-                for (int j = 0; j < openBrackets; j++) {
-                    structureStack.push('[');
-                }
-
-                for (int j = 0; j < closeBrackets; j++) {
-                    if (!structureStack.isEmpty() && structureStack.peek() == '[') {
-                        structureStack.pop();
-                    }
-                    else return false; // Mismatched brackets
-                }
-            }
-
-            // Closing structural characters
-            if (!hasStructuralChars && (StringOperations.containsUnquotedChar(line, '}') || StringOperations.containsUnquotedChar(line, ']'))) {
-                hasStructuralChars = true;
-                int closeBraces = StringOperations.countUnquotedChar(line, '}');
-                int closeBrackets = StringOperations.countUnquotedChar(line, ']');
-
-                for (int j = 0; j < closeBraces; j++) {
-                    try {
-                        indices.put(stack.pop(), i);
-                        if (!structureStack.isEmpty() && structureStack.peek() == '{') {
-                            structureStack.pop();
-                        }
-                        else return false; // Mismatched braces
-                    }
-                    catch (EmptyStackException e) {
-                        return false;
-                    }
-                }
-
-                for (int j = 0; j < closeBrackets; j++) {
-                    if (!structureStack.isEmpty() && structureStack.peek() == '[') {
-                        structureStack.pop();
-                    }
-                    else return false; // Mismatched brackets
-                }
-            }
-
-            // Check for missing or misplaced commas
-            boolean hasComma = line.endsWith(",");
-            String nextLine = null;
-            for (int j = i + 1; j < contents.size(); j++) {
-                String next = contents.get(j).trim();
-                if (!next.isEmpty()) {
-                    nextLine = next;
-                    break;
-                }
-            }
-            // The element has a comma: check that it's supposed to be there.
-            if (hasComma) {
-                // An element should have a comma if it is not the last element in an array or list
-                if (nextLine.startsWith("}") || nextLine.startsWith("]")) {
-                    return false; // Misplaced comma afer last entry
-                }
-            }
-            // The element does not have a comma: check that it's not supposed to.
-            else {
-                // The element should not have a comma if it is the last element in an array or list
-                if (nextLine != null && !nextLine.startsWith("}") && !nextLine.startsWith("]")) {
-                    if (!line.endsWith("{") && !line.endsWith("[")) return false; // Missing comma between entries
-                }
-            }
-
-            if (hasStructuralChars) continue;
-
-            // Check format based on current context
-            if (!structureStack.isEmpty() && structureStack.peek() == '{') {
-                // Inside an object
-                if (!StringOperations.containsUnquotedChar(line, ':')) {
-                    return false; // Objects must have a key-value pair
-                }
-                // Validate key format
-                String[] parts = StringOperations.splitByUnquotedString(line, ":", 2);
-                String key = parts[0].trim();
-                if (!key.startsWith("\"") || !key.endsWith("\"")) {
-                    return false; // The key must be quoted
-                }
-            }
-
-            if (!hasStructuralChars)
-                firstObjectEntry = false;
+    public static boolean validateJson(Iterable<String> contents) {
+        if (contents == null) return false;
+        StringBuilder sb = new StringBuilder();
+        for (String line : contents) {
+            if (line != null) sb.append(line);
         }
-        return stack.isEmpty() && structureStack.isEmpty();
-        // If false, there is an opening brace/bracket unmatched to a closing brace/bracket.
-        // If true, no errors encountered: the JSON file is well-structured.
+        return validateJson(sb.toString());
     }
-    
-    /** Tracks the unique keys in the JSON tree structure. */
-    private static TreeSet<Set<String>> keys;
 
+    /**
+     * Validates a JSON string by normalizing whitespace and validating the object structure.
+     * <p>
+     * This method processes a JSON string by:
+     * <ol>
+     *   <li>Replacing all newlines outside of strings with spaces</li>
+     *   <li>Trimming leading and trailing whitespace</li>
+     *   <li>Validating the resulting string as a JSON object</li>
+     * </ol>
+     * <p>
+     * The input must represent a valid JSON value containing at least one of the following:
+     * <ul>
+     *   <li>String: Characters surrounded by double quotes
+     *   <li>Number: Number with integer and possible fraction and/or exponent part
+     *   <li>Object: Key-Value pairs separated by commas, all surrouned by curly braces { }
+     *   <li>Array: Values separated by commas, all surrounded by square brackets [ ]
+     *   <li>true
+     *   <li>false
+     *   <li>null
+     * </ul>
+     *
+     * @param jsonLine The JSON string to validate (may contain newlines)
+     * @return {@code true} if the string represents a valid JSON object, {@code false} otherwise
+     * @see JSONValidator#validateObject(String)
+     */
     public static boolean validateJson(String jsonLine) {
-        return true;
+        String processed = StringOperations.replaceAllNotInString(jsonLine, "\n", " ").trim(); // Put the while structure on one line
+        return validateValue(processed);
     }
 
+    /**
+     * Validates an Object.
+     * <p>
+     * <pre>
+     * &lt;object&gt; ::= { } | { &lt;members&gt; }
+     * </pre>
+     * @param objectLine The line containing the full object to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the object is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateObject(String objectLine) {
-        return true;
+        if (objectLine == null) return false;
+        objectLine = objectLine.trim();
+        if (objectLine.isEmpty()) return false;
+
+        if (!objectLine.startsWith("{") || !objectLine.endsWith("}"))
+            return false;
+        String members = objectLine.substring(1, objectLine.length() - 1).trim();
+        if (members.isEmpty()) return true;
+        return validateMembers(members);
     }
 
+    /**
+     * Validates members
+     * <p>
+     * <pre>
+     * &lt;members&gt; ::= &lt;pair&gt; | &lt;pair&gt; , &lt;members&gt;
+     * </pre>
+     * @param membersLine The line contining the full members to be parsed
+     * @return {@code true} if the members are successfully parsed, {@code false} otherwise
+     */
     public static boolean validateMembers(String membersLine) {
+        if (membersLine == null) return false;
+        membersLine = membersLine.trim();
+        if (membersLine.isEmpty()) return false;
+
+        Set<String> keys = new TreeSet();
+        String[] members = StringOperations.splitByStringNotNested(membersLine, ",");
+        
+        for (String pair : members) {
+            if (!validatePair(pair)) return false;
+
+            String[] parts = StringOperations.splitByStringNotNested(pair.trim(), ":");
+            String key = parts[0].trim();
+            key = key.substring(1, key.length() - 1); // Remove the surrounding quotes
+
+            // Check for duplicates
+            if (!keys.add(key)) return false;
+        }
         return true;
     }
 
+    /**
+     * Validates pair
+     * <p>
+     * <pre>
+     * &lt;pair&gt; ::= &lt;string&gt; : &lt;value&gt;
+     * </pre>
+     * @param pairLine The line contining the full pair to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the pair is successfully parsed, {@code false} otherwise
+     */
     public static boolean validatePair(String pairLine) {
+        if (pairLine == null) return false;
+        pairLine = pairLine.trim();
+        if (pairLine.isEmpty()) return false;
+
+        String[] parts = StringOperations.splitByStringNotNested(pairLine, ":");
+        if (parts.length != 2) return false;
+        String key = parts[0].trim();
+        String value = parts[1].trim();
+
+        if (!validateString(key)) return false;
+        if (!validateValue(value)) return false;
         return true;
     }
 
+    /**
+     * Validates array
+     * <p>
+     * <pre>
+     * &lt;array&gt; ::= [ ] | [ &lt;elements&gt; ]
+     * </pre>
+     * @param arrayLine The line contining the full array to be parsed (may not be null or empty or blank)
+     * @return {@code true} if the array is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateArray(String arrayLine) {
-        return true;
+        if (arrayLine == null) return false;
+        arrayLine = arrayLine.trim();
+        if (arrayLine.isEmpty()) return false;
+
+        if (!arrayLine.startsWith("[") || !arrayLine.endsWith("]"))
+            return false;
+        String elements = arrayLine.substring(1, arrayLine.length() - 1).trim();
+        if (elements.isEmpty()) return true;
+        return validateElements(elements);
     }
 
+    /**
+     * Validates elements
+     * <p>
+     * <pre>
+     * &lt;elements&gt; ::= &lt;value&gt; | &lt;value&gt; , &lt;elements&gt;
+     * </pre>
+     * @param elementsLine The line contining the full elements to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the elements are successfully parsed, {@code false} otherwise
+     */
     public static boolean validateElements(String elementsLine) {
+        if (elementsLine == null) return false;
+        elementsLine = elementsLine.trim();
+        if (elementsLine.isEmpty()) return false;
+
+        String[] values = StringOperations.splitByStringNotNested(elementsLine, ",");
+        for (String value : values) {
+            if (!validateValue(value)) return false;
+        }
         return true;
     }
 
+    /**
+     * Validates value
+     * <p>
+     * <pre>
+     * &lt;value&gt; ::= &lt;string&gt; | &lt;number&gt; | &lt;object&gt; | &lt;array&gt; | true | false | null
+     * </pre>
+     * @param valueLine The line contining the full value to be parsed (may not be null or empty or blank)
+     * @return {@code true} if the value is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateValue(String valueLine) {
-        return true;
+        if (valueLine == null) return false;
+        valueLine = valueLine.trim();
+        if (valueLine.isEmpty()) return false;
+
+        if (valueLine.equals("true") || valueLine.equals("false") || valueLine.equals("null")) return true;
+        return validateString(valueLine)
+            || validateNumber(valueLine)
+            || validateObject(valueLine)
+            || validateArray(valueLine);
     }
 
+    /**
+     * Validates string
+     * <p>
+     * <pre>
+     * &lt;string&gt; ::= " " | " &lt;characters&gt; "
+     * </pre>
+     * @param stringLine The line contining the full string to be parsed (may not be null or empty, but may be blank)
+     * @return {@code true} if the string is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateString(String stringLine) {
-        return true;
+        if (stringLine == null) return false;
+        if (stringLine.isEmpty()) return false;
+
+        if (stringLine.length() < 2) return false;
+        if (!stringLine.startsWith("\"") || !stringLine.endsWith("\"")) return false;
+        if (stringLine.length() < 3) return true;
+        return validateCharacters(stringLine.substring(1, stringLine.length() - 1));
     }
 
+    /**
+     * Validates characters
+     * <p>
+     * <pre>
+     * &lt;characters&gt; ::= &lt;character&gt; | &lt;character&gt; &lt;characters&gt;
+     * </pre>
+     * @param charactersLine The line contining the full characters to be parsed (must not be null or empty, but may be blank)
+     * @return {@code true} if the characters are successfully parsed, {@code false} otherwise
+     */
     public static boolean validateCharacters(String charactersLine) {
+        if (charactersLine == null) return false;
+        if (charactersLine.isEmpty()) return false;
+
+        for (int i = 0; i < charactersLine.length(); ) {
+            if (charactersLine.charAt(i) == '\\') {
+                int escapeEnd = i + 1;
+                if (escapeEnd >= charactersLine.length()) return false;
+
+                if (charactersLine.charAt(escapeEnd) == 'u') {
+                    escapeEnd += 4;
+                }
+                escapeEnd++;
+
+                if (escapeEnd > charactersLine.length()) return false;
+
+                if (!validateEscape(charactersLine.substring(i, escapeEnd))) return false;
+                i = escapeEnd;
+                continue;
+            }
+            int charLength = Character.charCount(charactersLine.codePointAt(i));
+            if (!validateCharacter(charactersLine.substring(i, i + charLength))) return false;
+            i += charLength;
+        }
+
         return true;
     }
 
+    /**
+     * Validates character
+     * <p>
+     * <pre>
+     * &lt;character&gt; ::= # any unicode character except "" or \ or control characters # | &lt;escape&gt;
+     * </pre>
+     * @param characterLine The line contining the full character to be parsed (must not be null)
+     * @return {@code true} if the character is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateCharacter(String characterLine) {
+        if (characterLine == null) return false;
+
+        if (characterLine.startsWith("\\"))
+            return validateEscape(characterLine);
+
+        int charCount = characterLine.codePointCount(0, characterLine.length());
+        if (charCount != 1) return false;
+
+        int codePoint = characterLine.codePointAt(0);
+
+        if (Character.isISOControl(codePoint))
+            return false;
+        if (codePoint == '\"' || codePoint == '\\')
+            return false;
+
         return true;
     }
 
+    /**
+     * Validates escape character
+     * <p>
+     * <pre>
+     * &lt;escape&gt; ::= \ (" | \ | / | b | f | n | r | t | u &lt;hex&gt;&lt;hex&gt;&lt;hex&gt;&lt;hex&gt;)
+     * </pre>
+     * @param escapeLine The line contining the full escape to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the escape is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateEscape(String escapeLine) {
+        if (escapeLine == null) return false;
+        escapeLine = escapeLine.trim();
+        if (escapeLine.isEmpty()) return false;
+        if (escapeLine.charAt(0) != '\\') return false;
+
+        if (escapeLine.length() < 2) return false;
+        char[] escapeChars = {'"', '\\', '/', 'b', 'f', 'n', 'r', 't', 'u'};
+        boolean validEscape = false;
+        for (char escape : escapeChars)
+            if (escape == escapeLine.charAt(1))
+                validEscape = true;
+        if (!validEscape) return false;
+        // validate special character hex
+        if (escapeLine.charAt(1) == 'u') {
+            if (escapeLine.length() != 6) return false;
+            for (int i = 2; i <= 5; i++)
+                if (!validateHex(escapeLine.charAt(i)))
+                    return false;
+        }
+        else if (escapeLine.length() > 2) return false;
         return true;
     }
 
+    /**
+     * Validates number
+     * <p>
+     * <pre>
+     * &lt;number&gt; ::= &lt;int&gt; &lt;frac&gt;? &lt;exp&gt;?
+     * </pre>
+     * @param numberLine The line contining the full number to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the number is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateNumber(String numberLine) {
+        if (numberLine == null) return false;
+        numberLine = numberLine.trim().toUpperCase();
+        if (numberLine.isEmpty()) return false;
+        // Identify portions
+        int beginInt = 0;
+        int beginFrac = numberLine.indexOf(".");
+        int beginExp = numberLine.indexOf("E");
+
+        int endExp = numberLine.length();
+        int endFrac = beginExp != -1 ? beginExp : endExp;
+        int endInt = beginFrac != -1 ? beginFrac : endFrac;
+
+        // Parse integer part
+        if (!validateInt(numberLine.substring(beginInt, endInt))) return false;
+        // Parse fraction part
+        if (beginFrac != -1) {
+            if (!validateFrac(numberLine.substring(beginFrac, endFrac))) return false;
+        }
+        // Parse exponent part
+        if (beginExp != -1) {
+            if (!validateExp(numberLine.substring(beginExp, endExp))) return false;
+        }
         return true;
     }
 
+    /**
+     * Validates integer
+     * <p>
+     * <pre>
+     * &lt;int&gt; ::= -? &lt;digits&gt;
+     * </pre>
+     * @param intLine The line contining the full int to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the int is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateInt(String intLine) {
-        return true;
+        if (intLine == null) return false;
+        intLine = intLine.trim();
+        if (intLine.isEmpty()) return false;
+        if (intLine.charAt(0) == '-') {
+            return validateDigits(intLine.substring(1));
+        }
+        return validateDigits(intLine);
     }
 
+    /**
+     * Validates fraction
+     * <p>
+     * <pre>
+     * &lt;frac&gt; ::= . &lt;digits&gt;
+     * </pre>
+     * @param fracLine The line contining the full frac to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the frac is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateFrac(String fracLine) {
-        return true;
+        if (fracLine == null) return false;
+        fracLine = fracLine.trim();
+        if (fracLine.isEmpty()) return false;
+
+        if (fracLine.length() < 2) return false;
+        if (fracLine.charAt(0) != '.') return false;
+        return validateDigits(fracLine.substring(1));
     }
 
+    /**
+     * Validates exponent
+     * <p>
+     * <pre>
+     * &lt;exp&gt; ::= (e | E) (+ | -)? &lt;digits&gt;
+     * </pre>
+     * @param expLine The line contining the full exp to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the exp is successfully parsed, {@code false} otherwise
+     */
     public static boolean validateExp(String expLine) {
-        return true;
+        if (expLine == null) return false;
+        expLine = expLine.trim();
+        if (expLine.isEmpty()) return false;
+        if (expLine.length() < 2) return false;
+        if (expLine.charAt(0) != 'e' && expLine.charAt(0) != 'E') return false;
+        if (expLine.charAt(1) == '+' || expLine.charAt(1) == '-') {
+            return validateDigits(expLine.substring(2));
+        }
+        return validateDigits(expLine.substring(1));
     }
 
+    /**
+     * Validates digits
+     * <p>
+     * <pre>
+     * &lt;digits&gt; ::= &lt;digit&gt; | &lt;digit&gt; &lt;digits&gt;
+     * </pre>
+     * @param digitsLine The line contining the full digits to be parsed (must not be null or empty or blank)
+     * @return {@code true} if the digits are successfully parsed, {@code false} otherwise
+     */
     public static boolean validateDigits(String digitsLine) {
+        if (digitsLine == null) return false;
+        digitsLine = digitsLine.trim();
+        if (digitsLine.isEmpty()) return false;
+        for (char digit : digitsLine.toCharArray()) {
+            if (!validateDigit(digit)) return false;
+        }
         return true;
     }
 
-    public static boolean validateDigit(String digitLine) {
-        return true;
+    /**
+     * Validates digit
+     * <p>
+     * <pre>
+     * &lt;digit&gt; ::= # digit from 0 to 9 #
+     * </pre>
+     * @param digit The the digit to be parsed
+     * @return {@code true} if the digit is successfully parsed, {@code false} otherwise
+     */
+    public static boolean validateDigit(char digit) {
+        return digit >= '0' && digit <= '9'; 
     }
 
-    public static boolean validateHex(String hexLine) {
-        return true;
+    /**
+     * Validates hex
+     * <p>
+     * <pre>
+     * &lt;hex&gt; ::= &lt;digit&gt; | [a-f] [A-F]
+     * </pre>
+     * @param hex The hex to be parsed
+     * @return {@code true} if the hex is successfully parsed, {@code false} otherwise
+     */
+    public static boolean validateHex(char hex) {
+        return validateDigit(hex) || (hex >= 'a' && hex <= 'f') || (hex >= 'A' && hex <= 'F');
     }
 }

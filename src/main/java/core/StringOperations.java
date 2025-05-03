@@ -311,8 +311,8 @@ public class StringOperations {
      * and then reverses the resulting string again to produce the final output.
      *
      * @param text The input string in which the replacement will be made.
-     * @param regex The regular expression to match for the replacement.
-     * @param replacement The string to replace the matched regex.
+     * @param regex The regular expression to match for the replacement
+     * @param replacement The string to replace the matched regex
      * @return A new string with the first occurrence of the regex replaced by the replacement string.
      * @see String#replaceFirst(String, String)
      */
@@ -321,15 +321,29 @@ public class StringOperations {
     }
 
     /**
-     * Replaces all occurrences of a specified regular expression with a replacement string in the input text.
+     * Replaces all occurrences of a specified regular expression in the input text with a replacement string.
      * @param text The input string in which the replacements will be made.
      * @param regex The regular expression to match for the replacement.
-     * @param replacement The string to replace the matched regex.
+     * @param replacement The string to replace the matched regex
      * @return A new string with all occurrences of the regex replaced by the replacement string.
      * @see String#replaceAll(String, String)
      */
     public static String replaceAll(String text, String regex, String replacement) {
         return text.replaceAll(regex, replacement);
+    }
+
+    /**
+     * Replaces all occurrences of a specified regular expression where it appears outside of a quotated string in the input text with a replacement string.
+     * @param text The input string in which the replacements will be made.
+     * @param regex The regular expression to match for the replacement.
+     * @param replacement The string to replace the matched regex
+     * @return A new string with all occurrences of the regex outside of a string replaced by the replacement string
+     * @see #isInString(String, int)
+     */
+    public static String replaceAllNotInString(String text, String regex, String replacement) {
+        String[] split = splitByUnquotedString(text, regex);
+        String result = String.join(replacement, split);
+        return result;
     }
 
     /**

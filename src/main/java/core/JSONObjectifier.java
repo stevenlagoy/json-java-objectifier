@@ -14,9 +14,9 @@ public class JSONObjectifier {
      * @see Objectifier#verifyJSONFile(path)
      */
     public static JSONObject objectify(Path path) {
+        if (!JSONValidator.validateJson(path)) return null;
         List<String> JSONContents = JSONReader.readLines(path);
         String name = path.getFileName().toString().split("\\.")[0];
-        if (!JSONValidator.validate(JSONContents)) return null;
         return objectify(name, JSONContents);
     }
 
@@ -142,19 +142,15 @@ public class JSONObjectifier {
 
     /**
      * Interpret the value as a Java type.
-     * <ul><p>
-     * String -> java.lang.String
-     * <p>
-     * Number -> java.lang.Number
-     * <p>
-     * Object -> core.JSONObject
-     * <p>
-     * Array -> java.util.List&lt;?&gt;
-     * <p>
-     * Boolean -> java.lang.Boolean
-     * <p>
-     * null -> null
+     * <ul>
+     *   <li>String  -> java.lang.String
+     *   <li>Number  -> java.lang.Number
+     *   <li>Object  -> core.JSONObject
+     *   <li>Array   -> java.util.List&lt;?&gt;
+     *   <li>Boolean -> java.lang.Boolean
+     *   <li>null    -> null
      * </ul>
+     * Create an Object of the associated type with the equivalent value.
      * @param val The String form of a valid JSON value
      * @return An Object of the Java type matched to the JSON value's type. Returns the passed String if not mapped to another type.
      */
