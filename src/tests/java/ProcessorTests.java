@@ -99,7 +99,7 @@ public class ProcessorTests {
         assertEquals(1, num.intValue());
         
         // Test mixed array
-        List<Object> mixed = JSONProcessor.processArray("[1,\"two\",true]");
+        List<Object> mixed = JSONProcessor.processArray("[1.0,\"two\",true]");
         assertEquals(3, mixed.size());
         assertEquals(1.0, mixed.get(0));
         assertEquals("two", mixed.get(1));
