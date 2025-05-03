@@ -85,7 +85,7 @@ public class JSONValidator {
      * <pre>
      * &lt;object&gt; ::= { } | { &lt;members&gt; }
      * </pre>
-     * @param objectLine The line containing the full object to be parsed (must not be null or empty or blank)
+     * @param objectLine The line containing the full object to parse (must not be null or empty or blank)
      * @return {@code true} if the object is successfully parsed, {@code false} otherwise
      */
     public static boolean validateObject(String objectLine) {
@@ -106,7 +106,7 @@ public class JSONValidator {
      * <pre>
      * &lt;members&gt; ::= &lt;pair&gt; | &lt;pair&gt; , &lt;members&gt;
      * </pre>
-     * @param membersLine The line contining the full members to be parsed
+     * @param membersLine The line contining the full members to parse
      * @return {@code true} if the members are successfully parsed, {@code false} otherwise
      */
     public static boolean validateMembers(String membersLine) {
@@ -136,7 +136,7 @@ public class JSONValidator {
      * <pre>
      * &lt;pair&gt; ::= &lt;string&gt; : &lt;value&gt;
      * </pre>
-     * @param pairLine The line contining the full pair to be parsed (must not be null or empty or blank)
+     * @param pairLine The line contining the full pair to parse (must not be null or empty or blank)
      * @return {@code true} if the pair is successfully parsed, {@code false} otherwise
      */
     public static boolean validatePair(String pairLine) {
@@ -160,7 +160,7 @@ public class JSONValidator {
      * <pre>
      * &lt;array&gt; ::= [ ] | [ &lt;elements&gt; ]
      * </pre>
-     * @param arrayLine The line contining the full array to be parsed (may not be null or empty or blank)
+     * @param arrayLine The line contining the full array to parse (may not be null or empty or blank)
      * @return {@code true} if the array is successfully parsed, {@code false} otherwise
      */
     public static boolean validateArray(String arrayLine) {
@@ -181,7 +181,7 @@ public class JSONValidator {
      * <pre>
      * &lt;elements&gt; ::= &lt;value&gt; | &lt;value&gt; , &lt;elements&gt;
      * </pre>
-     * @param elementsLine The line contining the full elements to be parsed (must not be null or empty or blank)
+     * @param elementsLine The line contining the full elements to parse (must not be null or empty or blank)
      * @return {@code true} if the elements are successfully parsed, {@code false} otherwise
      */
     public static boolean validateElements(String elementsLine) {
@@ -202,7 +202,7 @@ public class JSONValidator {
      * <pre>
      * &lt;value&gt; ::= &lt;string&gt; | &lt;number&gt; | &lt;object&gt; | &lt;array&gt; | true | false | null
      * </pre>
-     * @param valueLine The line contining the full value to be parsed (may not be null or empty or blank)
+     * @param valueLine The line contining the full value to parse (may not be null or empty or blank)
      * @return {@code true} if the value is successfully parsed, {@code false} otherwise
      */
     public static boolean validateValue(String valueLine) {
@@ -223,7 +223,7 @@ public class JSONValidator {
      * <pre>
      * &lt;string&gt; ::= " " | " &lt;characters&gt; "
      * </pre>
-     * @param stringLine The line contining the full string to be parsed (may not be null or empty, but may be blank)
+     * @param stringLine The line contining the full string to parse (may not be null or empty, but may be blank)
      * @return {@code true} if the string is successfully parsed, {@code false} otherwise
      */
     public static boolean validateString(String stringLine) {
@@ -242,7 +242,7 @@ public class JSONValidator {
      * <pre>
      * &lt;characters&gt; ::= &lt;character&gt; | &lt;character&gt; &lt;characters&gt;
      * </pre>
-     * @param charactersLine The line contining the full characters to be parsed (must not be null or empty, but may be blank)
+     * @param charactersLine The line contining the full characters to parse (must not be null or empty, but may be blank)
      * @return {@code true} if the characters are successfully parsed, {@code false} otherwise
      */
     public static boolean validateCharacters(String charactersLine) {
@@ -279,7 +279,7 @@ public class JSONValidator {
      * <pre>
      * &lt;character&gt; ::= # any unicode character except "" or \ or control characters # | &lt;escape&gt;
      * </pre>
-     * @param characterLine The line contining the full character to be parsed (must not be null)
+     * @param characterLine The line contining the full character to parse (must not be null)
      * @return {@code true} if the character is successfully parsed, {@code false} otherwise
      */
     public static boolean validateCharacter(String characterLine) {
@@ -307,7 +307,7 @@ public class JSONValidator {
      * <pre>
      * &lt;escape&gt; ::= \ (" | \ | / | b | f | n | r | t | u &lt;hex&gt;&lt;hex&gt;&lt;hex&gt;&lt;hex&gt;)
      * </pre>
-     * @param escapeLine The line contining the full escape to be parsed (must not be null or empty or blank)
+     * @param escapeLine The line contining the full escape to parse (must not be null or empty or blank)
      * @return {@code true} if the escape is successfully parsed, {@code false} otherwise
      */
     public static boolean validateEscape(String escapeLine) {
@@ -340,7 +340,7 @@ public class JSONValidator {
      * <pre>
      * &lt;number&gt; ::= &lt;int&gt; &lt;frac&gt;? &lt;exp&gt;?
      * </pre>
-     * @param numberLine The line contining the full number to be parsed (must not be null or empty or blank)
+     * @param numberLine The line contining the full number to parse (must not be null or empty or blank)
      * @return {@code true} if the number is successfully parsed, {@code false} otherwise
      */
     public static boolean validateNumber(String numberLine) {
@@ -375,7 +375,7 @@ public class JSONValidator {
      * <pre>
      * &lt;int&gt; ::= -? &lt;digits&gt;
      * </pre>
-     * @param intLine The line contining the full int to be parsed (must not be null or empty or blank)
+     * @param intLine The line contining the full int to parse (must not be null or empty or blank)
      * @return {@code true} if the int is successfully parsed, {@code false} otherwise
      */
     public static boolean validateInt(String intLine) {
@@ -394,7 +394,7 @@ public class JSONValidator {
      * <pre>
      * &lt;frac&gt; ::= . &lt;digits&gt;
      * </pre>
-     * @param fracLine The line contining the full frac to be parsed (must not be null or empty or blank)
+     * @param fracLine The line contining the full frac to parse (must not be null or empty or blank)
      * @return {@code true} if the frac is successfully parsed, {@code false} otherwise
      */
     public static boolean validateFrac(String fracLine) {
@@ -413,7 +413,7 @@ public class JSONValidator {
      * <pre>
      * &lt;exp&gt; ::= (e | E) (+ | -)? &lt;digits&gt;
      * </pre>
-     * @param expLine The line contining the full exp to be parsed (must not be null or empty or blank)
+     * @param expLine The line contining the full exp to parse (must not be null or empty or blank)
      * @return {@code true} if the exp is successfully parsed, {@code false} otherwise
      */
     public static boolean validateExp(String expLine) {
@@ -434,7 +434,7 @@ public class JSONValidator {
      * <pre>
      * &lt;digits&gt; ::= &lt;digit&gt; | &lt;digit&gt; &lt;digits&gt;
      * </pre>
-     * @param digitsLine The line contining the full digits to be parsed (must not be null or empty or blank)
+     * @param digitsLine The line contining the full digits to parse (must not be null or empty or blank)
      * @return {@code true} if the digits are successfully parsed, {@code false} otherwise
      */
     public static boolean validateDigits(String digitsLine) {
@@ -453,7 +453,7 @@ public class JSONValidator {
      * <pre>
      * &lt;digit&gt; ::= # digit from 0 to 9 #
      * </pre>
-     * @param digit The the digit to be parsed
+     * @param digit The the digit character to parse
      * @return {@code true} if the digit is successfully parsed, {@code false} otherwise
      */
     public static boolean validateDigit(char digit) {
@@ -466,7 +466,7 @@ public class JSONValidator {
      * <pre>
      * &lt;hex&gt; ::= &lt;digit&gt; | [a-f] [A-F]
      * </pre>
-     * @param hex The hex to be parsed
+     * @param hex The hex to parse
      * @return {@code true} if the hex is successfully parsed, {@code false} otherwise
      */
     public static boolean validateHex(char hex) {
