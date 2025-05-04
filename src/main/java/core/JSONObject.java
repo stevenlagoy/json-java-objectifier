@@ -471,6 +471,7 @@ public class JSONObject implements Iterable<Object> {
      *
      * @see JSONObject#toString()
      */
+    @Override
     public boolean equals(JSONObject other) {
         return this.toString().equals(other.toString());
     }

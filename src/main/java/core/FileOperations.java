@@ -91,6 +91,9 @@ public class FileOperations {
         }
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
+                if (path == null || path.getFileName() == null) {
+                    continue; // Skip null paths
+                }
                 String fileName = path.getFileName().toString();
                 if (!Files.isDirectory(path) && !FilePaths.IGNORED_FILES.contains(fileName)
                         && fileName.endsWith(extension.getExtension())) {
@@ -99,7 +102,7 @@ public class FileOperations {
             }
             return pathSet;
         } catch (IOException e) {
-            System.out.println("Error accessing directory: " + dir);
+            System.err.println("Error accessing directory: " + dir + " - " + e.getMessage());
             throw e;
         }
     }
