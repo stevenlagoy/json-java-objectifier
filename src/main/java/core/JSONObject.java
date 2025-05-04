@@ -305,6 +305,7 @@ public class JSONObject implements Iterable<Object> {
      *
      * @see JSONObject#toString(int)
      */
+    @Override
     public String toString() {
         return toString(0);
     }
@@ -349,7 +350,12 @@ public class JSONObject implements Iterable<Object> {
                     if (item == null) {
                         System.out.println("null");
                     }
-                    sb.append(item.toString(indent + 1));
+                    if (item != null) {
+                        sb.append(item.toString(indent + 1));
+                    }
+                    else {
+                        sb.append("null");
+                    }
                     if (i < list.size() - 1)
                         sb.append(",");
                     sb.append("\n");
@@ -448,6 +454,11 @@ public class JSONObject implements Iterable<Object> {
                 entries += 1;
         }
         return entries;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
     }
 
     /**

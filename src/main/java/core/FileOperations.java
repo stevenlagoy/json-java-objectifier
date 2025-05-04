@@ -1,9 +1,11 @@
 package core;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -79,10 +81,14 @@ public class FileOperations {
      *             If the directory path is invalid or unable to be located.
      */
     public static Set<Path> listFiles(Path dir, FileExtension extension) throws IOException {
+        if (dir == null) {
+            throw new IllegalArgumentException("Path cannot be null");
+        }
         Set<Path> pathSet = new HashSet<>();
         dir = dir.normalize();
-        if (!Files.exists(dir))
+        if (!Files.exists(dir)) {
             throw new IOException("The specified path, " + dir.toString() + ", was not found.");
+        }
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
                 String fileName = path.getFileName().toString();
@@ -140,8 +146,10 @@ public class FileOperations {
     public static void writeFile(File file, List<String> content) {
         try {
             Files.createDirectories(file.getParentFile().toPath());
-            file.createNewFile();
-            try (FileWriter writer = new FileWriter(file, false)) {
+            if (!file.createNewFile() && !file.exists()) {
+                throw new IOException("Failed to create new file: " + file.getAbsolutePath());
+            }
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file, false), StandardCharsets.UTF_8)) {
                 for (String line : content) {
                     writer.write(line + "\n");
                 }
