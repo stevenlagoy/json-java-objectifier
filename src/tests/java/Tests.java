@@ -7,19 +7,29 @@ import java.util.List;
 import org.junit.Test;
 
 import core.FileOperations;
+import core.JSONObject;
 import core.JSONProcessor;
 
 public class Tests {
 
     @Test
     public void testNumbers() {
-        String expected = String.join("\n", FileOperations.readFile(Path.of("src\\tests\\java\\data\\test1\\expected1.out")));
-        assertNotNull("Expected file content should not be null", expected);
+        // Normalize path separators for cross-platform compatibility
+        Path expectedPath = Path.of("src", "tests", "java", "data", "test1", "expected1.out");
+        Path testPath = Path.of("src", "tests", "java", "data", "test1", "test1.json");
         
-        String result = JSONProcessor.processJson(Path.of("src\\tests\\java\\data\\test1\\test1.json")).toString();
-        assertNotNull("Processed JSON should not be null", result);
+        // Read and normalize the expected content
+        List<String> expectedLines = FileOperations.readFile(expectedPath);
+        assertNotNull("Expected file content should not be null", expectedLines);
+        String expected = String.join(System.lineSeparator(), expectedLines).trim();
         
-        assertEquals(expected, result);
+        // Process and normalize the actual result
+        JSONObject processed = JSONProcessor.processJson(testPath);
+        assertNotNull("Processed JSON should not be null", processed);
+        String result = processed.toString().trim();
+        
+        // Compare normalized strings
+        assertEquals("JSON content does not match expected output", expected, result);
     }
 
     @Test
