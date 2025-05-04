@@ -14,7 +14,7 @@
         "negative_double" : -3.14159,
         "exponential_positive" : 1.2E10,
         "exponential_negative" : -4.5E-5,
-        "double_max" : 1.7976931348623157e308,
-        "double_min" : 2.2250738585072014e-308
+        "double_max" : 1.7976931348623157E308,
+        "double_min" : 2.2250738585072014E-308
     }
 }
