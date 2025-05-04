@@ -18,7 +18,7 @@ public class ValidatorTests {
         assertTrue(JSONValidator.validateJson("{\"mixed\":[1,{\"key\":\"value\"},\"string\"]}"));
         assertTrue(JSONValidator.validateJson("{\"unicode\":\"🌟\"}"));
         assertTrue(JSONValidator.validateJson("{\"number\":42.5e-10}"));
-        
+
         // assertFalse(JSONValidator.validateJson(null));
         assertFalse(JSONValidator.validateJson(""));
         assertFalse(JSONValidator.validateJson(" "));
@@ -35,19 +35,9 @@ public class ValidatorTests {
 
     @Test
     public void testValidateJsonMultiline() {
-        String multiline = String.join("\n",
-            "{",
-            "    \"key1\": \"value1\",",
-            "    \"key2\": {",
-            "        \"nested\": \"value2\"",
-            "    },",
-            "    \"key3\": [",
-            "        1,",
-            "        2,",
-            "        3",
-            "    ]",
-            "}"
-        );
+        String multiline = String.join("\n", "{", "    \"key1\": \"value1\",", "    \"key2\": {",
+                "        \"nested\": \"value2\"", "    },", "    \"key3\": [", "        1,", "        2,", "        3",
+                "    ]", "}");
         assertTrue(JSONValidator.validateJson(multiline));
     }
 
@@ -65,23 +55,23 @@ public class ValidatorTests {
     public void testDuplicateKeys() {
         // Invalid - duplicate keys at root level
         assertFalse(JSONValidator.validateJson("{\"key\":1,\"key\":2}"));
-        
+
         // Invalid - duplicate keys in nested object
         assertFalse(JSONValidator.validateJson("{\"outer\":{\"key\":1,\"key\":2}}"));
-        
+
         // Valid - same key name but in different objects
         assertTrue(JSONValidator.validateJson("{\"obj1\":{\"key\":1},\"obj2\":{\"key\":2}}"));
-        
+
         // Invalid - duplicate keys with different value types
         assertFalse(JSONValidator.validateJson("{\"key\":1,\"key\":\"string\"}"));
-        
+
         // Invalid - duplicate keys with same values
         assertFalse(JSONValidator.validateJson("{\"key\":1,\"key\":1}"));
     }
 
     @Test
     public void validateObject() {
-        
+
         assertFalse(JSONValidator.validateObject(null));
         assertFalse(JSONValidator.validateObject(""));
         assertFalse(JSONValidator.validateObject("    "));
@@ -108,7 +98,7 @@ public class ValidatorTests {
 
     @Test
     public void validateMembers() {
-        
+
         assertFalse(JSONValidator.validateMembers(null));
         assertFalse(JSONValidator.validateMembers(""));
         assertFalse(JSONValidator.validateMembers("    "));
@@ -119,7 +109,8 @@ public class ValidatorTests {
         assertTrue(JSONValidator.validateMembers("\"array\" : [], \"array_of_array\" : [[]]"));
         assertTrue(JSONValidator.validateMembers("\"true\" : true, \"false\" : false, \"null\" : null"));
         assertTrue(JSONValidator.validateMembers("\"number1\" : 10, \"number2\" : 534.25E-49"));
-        assertTrue(JSONValidator.validateMembers("\"key containing , comma\" : \"value containing comma\", \"key\" : \"value\""));
+        assertTrue(JSONValidator
+                .validateMembers("\"key containing , comma\" : \"value containing comma\", \"key\" : \"value\""));
 
         assertFalse(JSONValidator.validateMembers("bad key : bad value"));
         assertFalse(JSONValidator.validateMembers("\"unpaired\" :"));
@@ -245,7 +236,7 @@ public class ValidatorTests {
 
         assertFalse(JSONValidator.validateString(null));
         assertFalse(JSONValidator.validateString(""));
-        
+
         assertTrue(JSONValidator.validateString("\"string\""));
         assertTrue(JSONValidator.validateString("\"\""));
         assertTrue(JSONValidator.validateString("\" string \""));
@@ -265,16 +256,16 @@ public class ValidatorTests {
         assertFalse(JSONValidator.validateCharacters(""));
 
         assertTrue(JSONValidator.validateCharacters("hello"));
-        assertTrue(JSONValidator.validateCharacters("hello world"));        
+        assertTrue(JSONValidator.validateCharacters("hello world"));
         assertTrue(JSONValidator.validateCharacters("hello\\n"));
         assertTrue(JSONValidator.validateCharacters("hello\\u263A"));
         assertTrue(JSONValidator.validateCharacters("汉字"));
         assertTrue(JSONValidator.validateCharacters("🌟✨"));
         assertTrue(JSONValidator.validateCharacters("👨‍👩‍👧‍👦"));
-        
-        assertFalse(JSONValidator.validateCharacters("hello\"world"));  // Contains quote
+
+        assertFalse(JSONValidator.validateCharacters("hello\"world")); // Contains quote
         assertFalse(JSONValidator.validateCharacters("hello\\zworld")); // Invalid escape
-        assertFalse(JSONValidator.validateCharacters("\n\t"));         // Control chars
+        assertFalse(JSONValidator.validateCharacters("\n\t")); // Control chars
     }
 
     @Test
@@ -284,12 +275,13 @@ public class ValidatorTests {
         assertTrue(JSONValidator.validateCharacter("5"));
         assertTrue(JSONValidator.validateCharacter(" "));
         assertTrue(JSONValidator.validateCharacter("🌟"));
-        // assertTrue(JSONValidator.validateCharacter("👨‍👩‍👧‍👦")); // This is a grapheme cluster containing zero-width joiners.
+        // assertTrue(JSONValidator.validateCharacter("👨‍👩‍👧‍👦")); // This is a grapheme cluster containing
+        // zero-width joiners.
         assertTrue(JSONValidator.validateCharacter("é"));
         assertTrue(JSONValidator.validateCharacter("汉"));
         assertTrue(JSONValidator.validateCharacter("\\n"));
         assertTrue(JSONValidator.validateCharacter("\\u263A"));
-        
+
         assertFalse(JSONValidator.validateCharacter("\""));
         assertFalse(JSONValidator.validateCharacter("\\"));
         assertFalse(JSONValidator.validateCharacter("\n"));
@@ -299,7 +291,7 @@ public class ValidatorTests {
 
     @Test
     public void validateEscape() {
-        String[] validEscapes = {"\\\"", "\\\\", "\\/", "\\b", "\\f", "\\n", "\\r", "\\t"};
+        String[] validEscapes = { "\\\"", "\\\\", "\\/", "\\b", "\\f", "\\n", "\\r", "\\t" };
 
         assertFalse(JSONValidator.validateEscape(null));
         assertFalse(JSONValidator.validateEscape(""));
@@ -316,7 +308,6 @@ public class ValidatorTests {
         assertFalse(JSONValidator.validateEscape("\\u"));
         assertFalse(JSONValidator.validateEscape("\u11111"));
     }
-
 
     @Test
     public void validateNumber() {
@@ -357,17 +348,17 @@ public class ValidatorTests {
         assertFalse(JSONValidator.validateNumber(invalidNumber7));
         assertFalse(JSONValidator.validateNumber(invalidNumber8));
     }
-    
+
     @Test
     public void validateFrac() {
-        
+
         assertFalse(JSONValidator.validateFrac(null));
         assertFalse(JSONValidator.validateFrac(""));
         assertFalse(JSONValidator.validateFrac("    "));
-        
+
         assertTrue(JSONValidator.validateFrac(".1"));
         assertTrue(JSONValidator.validateFrac(".99999999"));
-        
+
         assertFalse(JSONValidator.validateFrac("1"));
         assertFalse(JSONValidator.validateFrac("."));
         assertFalse(JSONValidator.validateFrac(".5."));

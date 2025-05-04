@@ -18,16 +18,14 @@ import java.util.Set;
 public class FileOperations {
 
     public static enum FileExtension {
-        ALL(""),
-        HTML(".html"),
-        JSON(".json"),
-        JAVA(".java"),
-        TEXT(".txt");
+        ALL(""), HTML(".html"), JSON(".json"), JAVA(".java"), TEXT(".txt");
 
         private final String extension;
+
         FileExtension(String extension) {
             this.extension = extension;
         }
+
         public String getExtension() {
             return extension;
         }
@@ -37,52 +35,64 @@ public class FileOperations {
         public static Scanner createScanner(InputStream inputStream) {
             return new Scanner(inputStream, StandardCharsets.UTF_8);
         }
+
         public static Scanner createScanner(File file) throws IOException {
             return new Scanner(file, StandardCharsets.UTF_8);
         }
     }
 
     /**
-     * Returns a Set of Paths for all the files in the specified directory. 
-     * <p>Equivalent to {@link FileOperations#listFiles(Path, FileExtension) listFiles(dir, FileExtension.ALL)}
+     * Returns a Set of Paths for all the files in the specified directory.
+     * <p>
+     * Equivalent to {@link FileOperations#listFiles(Path, FileExtension) listFiles(dir, FileExtension.ALL)}
      *
-     * @param dir The path to the directory to list the files within
+     * @param dir
+     *            The path to the directory to list the files within
+     *
      * @return A Set of Paths to each file within the directory
-     * @throws IOException If the directory path is invalid or unable to be located
+     *
+     * @throws IOException
+     *             If the directory path is invalid or unable to be located
+     *
      * @see FileExtension#ALL
      */
     public static Set<Path> listFiles(Path dir) throws IOException {
         try {
             Set<Path> pathSet = listFiles(dir, FileExtension.ALL);
             return pathSet;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw e;
         }
     }
 
     /**
      * Returns a Set of Paths for all the files in the specificed directory with the given extension.
-     * 
-     * @param dir The path to the directory to list the files within.
-     * @param extension A FileOperations.FileExtension to filter the Path results by.
+     *
+     * @param dir
+     *            The path to the directory to list the files within.
+     * @param extension
+     *            A FileOperations.FileExtension to filter the Path results by.
+     *
      * @return A Set of Paths to each file within the directory with the extension.
-     * @throws IOException If the directory path is invalid or unable to be located.
+     *
+     * @throws IOException
+     *             If the directory path is invalid or unable to be located.
      */
     public static Set<Path> listFiles(Path dir, FileExtension extension) throws IOException {
         Set<Path> pathSet = new HashSet<>();
         dir = dir.normalize();
-        if(!Files.exists(dir)) throw new IOException("The specified path, " + dir.toString() + ", was not found.");
+        if (!Files.exists(dir))
+            throw new IOException("The specified path, " + dir.toString() + ", was not found.");
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
                 String fileName = path.getFileName().toString();
-                if (!Files.isDirectory(path) && !FilePaths.IGNORED_FILES.contains(fileName) && fileName.endsWith(extension.getExtension())) {
+                if (!Files.isDirectory(path) && !FilePaths.IGNORED_FILES.contains(fileName)
+                        && fileName.endsWith(extension.getExtension())) {
                     pathSet.add(dir.resolve(fileName));
                 }
             }
             return pathSet;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Error accessing directory: " + dir);
             throw e;
         }
@@ -111,8 +121,7 @@ public class FileOperations {
                 result.add(scanner.nextLine());
             }
             return result;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
@@ -121,6 +130,7 @@ public class FileOperations {
     public static void writeFile(String filename, String extension, Path destination, String content) {
         writeFile(filename, extension, destination, Collections.singletonList(content));
     }
+
     public static void writeFile(String filename, String extension, Path destination, List<String> content) {
         Path filePath = destination.resolve(filename + extension);
         File file = filePath.toFile();

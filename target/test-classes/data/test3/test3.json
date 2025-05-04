@@ -10,7 +10,9 @@
         "key_containing_{_openbrace" : "value containing { openbrace",
         "key_containing_}_closebrace" : "value containing } closebrace",
         "key_containing_{}_braces" : "value containing {} braces",
-        "key_looks_like_object :\" {}" : {"actual_object" : "value looks like object \", {\"key\" : \"value\"}"},
+        "key_looks_like_object :\" {}" : {
+            "actual_object" : "value looks like object \", {\"key\" : \"value\"}"
+        },
         "unicode_strings" : {
             "emojis" : "😀 🎉 🌟 🚀",
             "mixed" : "Hello 👋 World 🌍",
@@ -26,8 +28,8 @@
         "form_feed" : "page1\fpage2",
         "backspace" : "text\bmore",
         "back_slash" : "back\\slash",
-        "forward_slash" : "forward\/slash",
-        "unicode" : "unicode: \u00A9 \u00AE",
+        "forward_slash" : "forward/slash",
+        "unicode" : "unicode: © ®",
         "quotes" : "\"quotated text\""
     }
 }
