@@ -59,4 +59,4 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
 
     - name: Check for common code issues
-      run: mvn spotbugs:checks
+      run: mvn spotbugs:check
