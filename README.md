@@ -17,7 +17,7 @@ Add this dependency to your `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.example</groupId>
+    <groupId>com.github.stevenlagoy</groupId>
     <artifactId>json-java-objectifier</artifactId>
     <version>1.0.0</version>
 </dependency>
