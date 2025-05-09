@@ -1,13 +1,10 @@
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import org.junit.Test;
 
 import core.FileOperations;
-import core.JSONObject;
 import core.JSONProcessor;
 
 public class Tests {

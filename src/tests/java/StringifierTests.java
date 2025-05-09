@@ -2,7 +2,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import core.JSONObject;
 import core.JSONStringifier;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
