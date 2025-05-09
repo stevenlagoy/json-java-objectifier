@@ -39,7 +39,9 @@ public class JSONProcessor {
     public static JSONObject processJson(Path path) {
         if (path == null) return null;
         List<String> contents = FileOperations.readFile(path);
-        String key = path.getFileName().toString().split("\\.")[0];
+        Path fileName = path.getFileName();
+        if (fileName == null) return null;
+        String key = fileName.toString().split("\\.")[0];
         return processJson(key, contents);
     }
 

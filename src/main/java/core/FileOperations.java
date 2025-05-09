@@ -93,8 +93,9 @@ public class FileOperations {
                 if (path == null || path.getFileName() == null) {
                     continue; // Skip null paths
                 }
-                String fileName = path.getFileName().toString();
-                if (!Files.isDirectory(path) && !FilePaths.IGNORED_FILES.contains(fileName)
+                Path fileName = path.getFileName();
+                if (fileName == null) return null;
+                if (!Files.isDirectory(path) && !FilePaths.IGNORED_FILES.contains(fileName.toString())
                         && fileName.endsWith(extension.getExtension())) {
                     pathSet.add(dir.resolve(fileName));
                 }
