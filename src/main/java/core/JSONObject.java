@@ -3,6 +3,7 @@ package core;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * A JSONObject is a custom data structure that represents a JSON object. It supports nested key-value pairs, arrays (as
@@ -165,6 +166,7 @@ public class JSONObject implements Iterable<Object> {
         return value instanceof Number ? (Number) value : null;
     }
 
+    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
     public Boolean getAsBoolean() {
         return value instanceof Boolean ? (Boolean) value : null;
     }
@@ -305,50 +307,6 @@ public class JSONObject implements Iterable<Object> {
     @Override
     public String toString() {
         return String.join("\n", JSONStringifier.expandJson(JSONStringifier.stringifyJson(this)));
-    }
-
-    /**
-     * Format a value as it would appear within a JSON file.
-     *
-     * @param val
-     *            An Object to format
-     *
-     * @return A String for the value properly formatted for JSON
-     */
-    private static String formatValue(Object val) {
-        if (val == null)
-            return "null";
-        if (val instanceof String)
-            return String.format("\"%s\"", val);
-        if (val instanceof JSONObject)
-            return val.toString();
-        return val.toString();
-    }
-
-    /**
-     * Counts the number of items within the list, for use with formatting a String representation of a JSONObject. Most
-     * types count as 1 entry, while instances of inner JSONObjects count as 3. Inner Arrays will be recursively
-     * counted.
-     *
-     * @param list
-     *            A list to count the number of entries within
-     *
-     * @return An int count of the list's recursive calculated size
-     *
-     * @see JSONObject#toString()
-     * @see JSONObject#SINGLE_LINE_ENTRIES_MAX
-     */
-    private static int countInnerListEntries(List<?> list) {
-        int entries = 0;
-        for (Object o : list) {
-            if (o instanceof JSONObject)
-                entries += 3;
-            else if (o instanceof List<?>)
-                entries += countInnerListEntries((List<?>) o);
-            else
-                entries += 1;
-        }
-        return entries;
     }
 
     @Override
