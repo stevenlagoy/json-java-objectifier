@@ -63,7 +63,6 @@ public class StringOperations {
     public static boolean isInObject(String line, int position) {
         int depth = 0;
         for (int i = 0; i < position; i++) {
-            char current = line.charAt(i);
             if (line.charAt(i) == '{' && !isInString(line, i))
                 depth++;
             else if (line.charAt(i) == '}' && !isInString(line, i))

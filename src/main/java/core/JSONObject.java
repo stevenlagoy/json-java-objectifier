@@ -342,7 +342,8 @@ public class JSONObject implements Iterable<Object> {
                     sb.append("{}");
                 else
                     sb.append("[]");
-            } else if (list.get(0) instanceof JSONObject) {
+            }
+            else if (list.get(0) instanceof JSONObject) {
                 sb.append("{\n");
                 for (int i = 0; i < list.size(); i++) {
                     sb.append(indentation).append(INDENT);
@@ -361,7 +362,8 @@ public class JSONObject implements Iterable<Object> {
                     sb.append("\n");
                 }
                 sb.append(indentation).append("}");
-            } else {
+            }
+            else {
                 StringBuilder listStrB = new StringBuilder();
                 listStrB.append("[");
                 for (int i = 0; i < list.size(); i++) {
@@ -401,7 +403,8 @@ public class JSONObject implements Iterable<Object> {
                     // result = String.join(",\n", lines);
 
                     sb.append("[\n").append(result).append("\n").append(indentation).append("]");
-                } else {
+                }
+                else {
                     result = indentation + INDENT + result;
 
                     sb.append(result.trim());
@@ -471,8 +474,8 @@ public class JSONObject implements Iterable<Object> {
      *
      * @see JSONObject#toString()
      */
-    @Override
     public boolean equals(JSONObject other) {
         return this.toString().equals(other.toString());
     }
+
 }

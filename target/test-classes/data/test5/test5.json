@@ -7,8 +7,7 @@
                     "multi_line_array" : [
                         1,
                         2, 3,
-                            4
-
+                        4
                     ],
                     "single_line_object" : {"key1" : "value1", "key2" : {"key3" : "value2"}, "key3" : [false, "string"]},
                     "mixed_array" : [
@@ -27,21 +26,19 @@
                     },
                     "single_line_nested_empty_objects" : { "empty" : {}},
                     "multi_line_nested_empty_objects" : {
-                        "object" : {"empty" : {
-                            
-                        }}
+                        "object" : {
+                            "empty" : { }
+                        }
                     },
-                    "single_line_empty_array" : [],
-                    "multi_line_empty_array" : [
-
-
-
+                    "single_line_empty_array" : [ ],
+                    "multi_line_empty_array" : [ ],
+                    "single_line_nested_empty_arrays" : [
+                        [ ]
                     ],
-                    "single_line_nested_empty_arrays" : [[]],
                     "multi_line_nested_empty_arrays" : [
-                        [[
-
-                        ]]
+                        [
+                            [ ]
+                        ]
                     ]
                 }
             }

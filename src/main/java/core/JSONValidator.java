@@ -133,7 +133,7 @@ public class JSONValidator {
         if (membersLine.isEmpty())
             return false;
 
-        Set<String> keys = new HashSet();
+        Set<String> keys = new HashSet<>();
         String[] members = StringOperations.splitByStringNotNested(membersLine, ",");
 
         for (String pair : members) {
