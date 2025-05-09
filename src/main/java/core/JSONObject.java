@@ -11,16 +11,6 @@ import java.util.List;
  */
 public class JSONObject implements Iterable<Object> {
 
-    /**
-     * The maximum number of array entries which may be put on a single line in the string representation. Objects are
-     * expanded and count as at least three lines.
-     */
-    public static final int SINGLE_LINE_ENTRIES_MAX = 5;
-    /** The maximum length of a line in string representation. Lines exceeding this length will be split. */
-    public static final int LINE_LENGTH_MAX = 55;
-    /** String used for indentation in formatted string output. */
-    public static final String INDENT = "    ";
-
     /*
      * Valid JSON types include:
      * String:
@@ -180,7 +170,14 @@ public class JSONObject implements Iterable<Object> {
     }
 
     public JSONObject getAsObject() {
-        return value instanceof JSONObject ? (JSONObject) value : null;
+
+        if (value instanceof JSONObject) return (JSONObject) value;
+
+        if (value instanceof List<?> && type.equals(JSONObject.class)) {
+            return this;
+        }
+
+        return null;
     }
 
     public List<?> getAsList() {
@@ -307,112 +304,7 @@ public class JSONObject implements Iterable<Object> {
      */
     @Override
     public String toString() {
-        return toString(0);
-    }
-
-    /**
-     * Turn this JSONObject into a String representation. Works recursively increasing the indentation with each
-     * recursion.
-     *
-     * @param indent
-     *            The number of indentation steps to add to each line in the resulting String
-     *
-     * @return The String representation of this JSONObject, indented the given number of steps
-     *
-     * @see JSONObject#toString()
-     * @see JSONObject#INDENT
-     */
-    private String toString(int indent) {
-        StringBuilder sb = new StringBuilder();
-        String indentation = INDENT.repeat(indent);
-
-        if (!key.equals(""))
-            sb.append(String.format("\"%s\" : ", this.key));
-
-        if (value == null)
-            sb.append("null");
-        else if (value instanceof String)
-            sb.append(String.format("\"%s\"", value));
-        else if (value instanceof Number || value instanceof Boolean)
-            sb.append(value);
-        else if (value instanceof List<?>) {
-            List<?> list = getAsList();
-            if (list.isEmpty()) {
-                if (type != null && JSONObject.class.isAssignableFrom(type))
-                    sb.append("{}");
-                else
-                    sb.append("[]");
-            }
-            else if (list.get(0) instanceof JSONObject) {
-                sb.append("{\n");
-                for (int i = 0; i < list.size(); i++) {
-                    sb.append(indentation).append(INDENT);
-                    JSONObject item = (JSONObject) list.get(i);
-                    if (item == null) {
-                        System.out.println("null");
-                    }
-                    if (item != null) {
-                        sb.append(item.toString(indent + 1));
-                    }
-                    else {
-                        sb.append("null");
-                    }
-                    if (i < list.size() - 1)
-                        sb.append(",");
-                    sb.append("\n");
-                }
-                sb.append(indentation).append("}");
-            }
-            else {
-                StringBuilder listStrB = new StringBuilder();
-                listStrB.append("[");
-                for (int i = 0; i < list.size(); i++) {
-                    if (i > 0)
-                        listStrB.append(", ");
-                    listStrB.append(formatValue(list.get(i)));
-                }
-                listStrB.append("]");
-                String result = listStrB.toString();
-
-                if (result.length() > LINE_LENGTH_MAX || countInnerListEntries(list) > SINGLE_LINE_ENTRIES_MAX) {
-                    // List must be single entry per line
-                    String[] lines = StringOperations.splitByStringNotInArray(result.substring(1, result.length() - 1),
-                            ",");
-                    result = "";
-                    for (int i = 0; i < lines.length; i++) {
-                        String[] linelines = lines[i].split("\n");
-                        int extraIndent = 0;
-                        for (int j = 0; j < linelines.length; j++) {
-                            String lineline = linelines[j];
-                            if (lineline.equals("}"))
-                                extraIndent--;
-                            result += indentation + INDENT + INDENT.repeat(extraIndent) + lineline.trim();
-                            if (lineline.equals("{")) {
-                                extraIndent++;
-                                result += "\n"; // skip comma
-                                continue;
-                            }
-                            if (j < linelines.length - 2)
-                                result += ",\n";
-                            else if (j == linelines.length - 2)
-                                result += "\n";
-                            else if (i < lines.length - 1)
-                                result += ",\n";
-                        }
-                    }
-                    // result = String.join(",\n", lines);
-
-                    sb.append("[\n").append(result).append("\n").append(indentation).append("]");
-                }
-                else {
-                    result = indentation + INDENT + result;
-
-                    sb.append(result.trim());
-                }
-            }
-        }
-
-        return sb.toString();
+        return String.join("\n", JSONStringifier.expandJson(JSONStringifier.stringifyJson(this)));
     }
 
     /**
@@ -474,7 +366,13 @@ public class JSONObject implements Iterable<Object> {
      *
      * @see JSONObject#toString()
      */
-    public boolean equals(JSONObject other) {
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        JSONObject other = (JSONObject) obj;
         return this.toString().equals(other.toString());
     }
 

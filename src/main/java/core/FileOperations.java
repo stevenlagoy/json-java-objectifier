@@ -24,7 +24,7 @@ public class FileOperations {
         private final String extension;
 
         FileExtension(String extension) {
-            this.extension = extension;
+            this.extension = extension != null ? extension : "";
         }
 
         public String getExtension() {

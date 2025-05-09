@@ -1,15 +1,11 @@
 package core;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class JSONStringifier {
-
-    public static void main(String[] args) {
-        JSONObject json = JSONProcessor.processJson(Path.of("src\\tests\\java\\data\\test1\\test1.json"));
-        System.out.println(JSONStringifier.stringifyJson(json));
-    }
     
     /*
      * JSON BNF Grammar
@@ -40,24 +36,29 @@ public class JSONStringifier {
      */
 
     public static String stringifyJson(JSONObject json) {
-        return stringifyValue(json.getValue());
+        String result = stringifyObject(json.getAsObject());
+        return result.substring(1, result.length() - 1);
     }
 
-    public static String stringifyValue(Object value) {
-        if (value instanceof List) {
-            List<?> list = (List<?>) value;
-            if (!list.isEmpty()) {
-                
-            }
-            return stringifyArray((List<?>) value);
+    public static String stringifyValue(Object value, Class<?> type) {
+        if (type.equals(JSONObject.class)) {
+            @SuppressWarnings("unchecked") // The type of this object is known from the type parameter
+            ArrayList<JSONObject> objects = (ArrayList<JSONObject>) value;
+            StringBuilder result = new StringBuilder();
+            for (JSONObject object : objects)
+                result.append(stringifyObject(object));
+            return result.toString();
         }
+        if (type.equals(ArrayList.class)) {
+            return stringifyArray((ArrayList<?>) value);
+        }
+        return stringifyValue(value);
+    }
+    public static String stringifyValue(Object value) {
         if (value instanceof String) return "\"" + stringifyEscape((String) value) + "\"";
         if (value instanceof Number || value instanceof Boolean) return value.toString();
         if (value == null) return "null";
         else throw new IllegalArgumentException("Unsupported JSON value: " + value);
-    }
-    public static String stringifyValue(Object value, Class<?> type) {
-        return null;
     }
 
     public static String stringifyObject(JSONObject object) {
@@ -65,12 +66,31 @@ public class JSONStringifier {
         
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        Iterator<?> it = object.iterator();
-        while (it.hasNext()) {
-            sb.append(stringifyValue(object.getKey())).append(" : ");
-            sb.append(stringifyValue(it.next()));
-            if (it.hasNext()) sb.append(", ");
+        
+        sb.append(stringifyValue(object.getKey()));
+        sb.append(" : ");
+
+        Object value = object.getValue();
+        Class<?> type = object.getType();
+
+        if (value == null)
+            sb.append("null");
+        else if (type != null && type.equals(JSONObject.class)) {
+            @SuppressWarnings("unchecked")
+            List<JSONObject> objects = (ArrayList<JSONObject>) value;
+            sb.append("{");
+            for (int i = 0; i < objects.size(); i++) {
+                String nested = stringifyObject(objects.get(i));
+                sb.append(nested.substring(1, nested.length() - 1));
+                if (i < objects.size() - 1) sb.append(", ");
+            }
+            sb.append("}");
         }
+        else if (type != null)
+            sb.append(stringifyValue(value, type));
+        else
+            sb.append(stringifyValue(value));
+
         sb.append("}");
 
         return sb.toString();
@@ -100,6 +120,61 @@ public class JSONStringifier {
             .replace("\n", "\\n")
             .replace("\r", "\\r")
             .replace("\t", "\\t");
+    }
+
+    public static List<String> expandJson(String json) {
+        List<String> result = new ArrayList<>();
+        int indentation = 0;
+        String tab = "    ";
+
+        StringBuilder currentLine = new StringBuilder();
+
+        for (int i = 0; i < json.length(); i++) {
+            char c = json.charAt(i);
+
+            if (StringOperations.isInString(json, i) && c != '"') {
+                currentLine.append(c);
+                continue;
+            }
+            switch (c) {
+                case '"' :
+                    currentLine.append(c);
+                    break;
+                case '{' :
+                case '[' :
+                    currentLine.append(c);
+                    result.add(tab.repeat(indentation) + currentLine);
+                    currentLine = new StringBuilder();
+                    indentation++;
+                    break;
+                case '}' :
+                case ']' :
+                    if (currentLine.length() > 0) {
+                        result.add(tab.repeat(indentation) + currentLine);
+                        currentLine = new StringBuilder();
+                    }
+                    indentation--;
+                    result.add(tab.repeat(indentation) + c);
+                    break;
+                case ',' :
+                    currentLine.append(c);
+                    result.add(tab.repeat(indentation) + currentLine);
+                    currentLine = new StringBuilder();
+                    break;
+                case ':' :
+                    currentLine.append(" ").append(c).append(" ");
+                    break;
+                default :
+                    if (!Character.isWhitespace(c)) {
+                        currentLine.append(c);
+                    }
+            }
+        }
+
+        if (currentLine.length() > 0) {
+            result.add(tab.repeat(indentation) + currentLine);
+        }
+        return result;
     }
 
 }
