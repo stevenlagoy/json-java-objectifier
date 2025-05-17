@@ -1,9 +1,9 @@
 {
-    "single_values" : {
-        "null" : null,
-        "booleans" : {
-            "true" : true,
-            "false" : false
-        }
-    }
+	"single_values" : {
+		"null" : null,
+		"booleans" : {
+			"true" : true,
+			"false" : false
+		}
+	}
 }

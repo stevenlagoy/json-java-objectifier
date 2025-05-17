@@ -124,8 +124,7 @@ public class JSONStringifier {
     public static List<String> expandJson(String json) {
         List<String> result = new ArrayList<>();
         int indentation = 0;
-        String tab = "    ";
-
+        String tab = "	";
         StringBuilder currentLine = new StringBuilder();
 
         for (int i = 0; i < json.length(); i++) {
@@ -153,7 +152,12 @@ public class JSONStringifier {
                         currentLine = new StringBuilder();
                     }
                     indentation--;
-                    result.add(tab.repeat(indentation) + c);
+                    if (i + 1 < json.length() && json.charAt(i + 1) == ',') {
+                        result.add(tab.repeat(indentation) + c + ",");
+                        i++;
+                    }
+                    else
+                        result.add(tab.repeat(indentation) + c);
                     break;
                 case ',' :
                     currentLine.append(c);
