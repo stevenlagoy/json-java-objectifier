@@ -10,6 +10,23 @@ import core.JSONProcessor;
 public class Tests {
 
     @Test
+    public void testVeryLargeFile() {
+
+        Path expectedPath = Path.of("src", "tests", "java", "data", "test6", "expected6.out"); 
+        Path testPath = Path.of("src", "tests", "java", "data", "test6", "test6.json");
+
+        long startTime = System.nanoTime();
+
+        String expected = String.join("\n", FileOperations.readFile(expectedPath));
+        String actual = JSONProcessor.processJson(testPath).toString();
+
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime) / 1000000; // in miliseconds
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testNumbers() {
         
         Path expectedPath = Path.of("src", "tests", "java", "data", "test1", "expected1.out");
