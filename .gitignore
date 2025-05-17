@@ -23,6 +23,8 @@
 hs_err_pid*
 replay_pid*
 
+target/
+
 # Keep test data files
 !src/tests/java/data/**/*.json
 !src/tests/java/data/**/*.out
