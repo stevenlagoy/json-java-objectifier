@@ -1,7 +1,9 @@
 package core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StringOperations {
 
@@ -9,9 +11,11 @@ public class StringOperations {
      * Determines whether a given position in a line of text is currently inside a string literal, accounting for
      * escaped quotes.
      *
-     * <p>This method scans the input line from the beginning up to (but not including) the specified position.
-     * It toggles the {@code inString} flag each time it encounters a non-escaped double quote character.
-     * This helps determine whether the character at the given position falls within a string.</p>
+     * <p>
+     * When called, this method checks if the "in-string" state for the provided line has already been computed and cached.
+     * If so, it returns the cached result for the given position in O(1) time. If not, it computes the in-string state for
+     * every character in the line, caches the result, and then returns the value for the requested position.
+     * </p>
      *
      * @param line
      *            The input string to analyze.
@@ -19,26 +23,41 @@ public class StringOperations {
      *            The index position in the string to check.
      *
      * @return {@code true} if the position is within a string literal, {@code false} otherwise.
+     * 
+     * @see #clearInStringCache()
      */
     public static boolean isInString(String line, int position) {
+        if (inStringCache == null) inStringCache = new HashMap<String, Boolean[]>();
+
+        // If the String is already in the cache, return the inString value for the given position.
+        Boolean[] inStringArr = inStringCache.get(line);
+        if (inStringArr != null) {
+            return inStringArr[position];
+        }
+
+        // Otherwise, precompute the cache entry for this String and call this method again.
+        inStringArr = new Boolean[line.length()];
         boolean inString = false;
-        for (int i = 0; i <= position; i++) { // Changed <= to < to exclude current position
-            if (i == position && line.charAt(i) == '"' && (i == 0 || line.charAt(i - 1) != '\\')) {
-                return false;
-            }
+        for (int i = 0; i < line.length(); i++) {
             if (line.charAt(i) == '"' && (i == 0 || line.charAt(i - 1) != '\\')) {
                 inString = !inString;
             }
+            inStringArr[i] = inString;
         }
-        return inString;
+        inStringCache.put(line, inStringArr);
+        return isInString(line, position);
     }
+    private static Map<String, Boolean[]> inStringCache;
+    public static void clearInStringCache() { inStringCache = null; }
 
     /**
-     * Determines whether the specified position in a line of text is currently inside a JSON array.
-     *
-     * <p>This method traverses the line up to (but not including) the given position, tracking array nesting depth.
-     * It increments depth when encountering a non-escaped '[' character outside of a string, and decrements it for ']'.
-     * If the resulting depth is greater than 0 at the given position, the position is considered to be inside an array.</p>
+     * Determines whether the specified position in a line of text is currently inside a JSON array (which is marked by square brackets {@code []}).
+     * <p>
+     * This method uses caching to improve performance for repeated queries on the same string. When called, it checks if the
+     * "in-array" state for the provided line has already been computed and cached. If so, it returns the cached result for
+     * the given position in O(1) time. If not, it computes the in-array state for every character in the line, caches the
+     * result, and then returns the value for the requested position.
+     * </p>
      *
      * @param line
      *            The input string to analyze.
@@ -48,28 +67,81 @@ public class StringOperations {
      * @return {@code true} if the position is within a JSON array, {@code false} otherwise.
      *
      * @see #isInString(String, int)
+     * @see #clearInArrayCache()
      */
     public static boolean isInArray(String line, int position) {
-        int depth = 0;
-        for (int i = 0; i < position; i++) {
-            if (line.charAt(i) == '[' && !isInString(line, i - 1))
-                depth++;
-            else if (line.charAt(i) == ']' && !isInString(line, i - 1))
-                depth--;
-        }
-        return depth == 0 ? false : true;
-    }
+        if (inArrayCache == null) inArrayCache = new HashMap<>();
 
-    public static boolean isInObject(String line, int position) {
-        int depth = 0;
-        for (int i = 0; i < position; i++) {
-            if (line.charAt(i) == '{' && !isInString(line, i))
-                depth++;
-            else if (line.charAt(i) == '}' && !isInString(line, i))
-                depth--;
+        // If the String is already in the cache, return the inArray value for the given position.
+        Boolean[] inArrayArr = inArrayCache.get(line);
+        if (inArrayArr != null) {
+            return inArrayArr[position];
         }
-        return depth == 0 ? false : true;
+
+        // Otherwise, precompute the cache entry for this String and call this method again.
+        inArrayArr = new Boolean[line.length()];
+        int depth = 0;
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) == '[' && (i == 0 || !isInString(line, i - 1)))
+                depth++;
+            else if (line.charAt(i) == ']' && (i == 0 || !isInString(line, i - 1)))
+                depth--;
+            inArrayArr[i] = depth > 0;
+        }
+        inArrayCache.put(line, inArrayArr);
+        return isInArray(line, position);
     }
+    private static Map<String, Boolean[]> inArrayCache;
+    public static void clearInArrayCache() { inStringCache = null; }
+
+
+    /**
+     * Determines whether the specified position in a line of text is currently inside a JSON object (which is marked by curly braces {@code &#123;&#125;}).
+     * <p>
+     * This method uses caching to improve performance for repeated queries on the same string. When called, it checks if the
+     * "in-object" state for the provided line has already been computed and cached. If so, it returns the cached result for
+     * the given position in O(1) time. If not, it computes the in-object state for every character in the line, caches the
+     * result, and then returns the value for the requested position.
+     * </p>
+     * <p>
+     * This caching approach greatly improves performance when the same string is analyzed multiple times, especially for
+     * large strings or when called in a loop.
+     * </p>
+     *
+     * @param line
+     *            The input string to analyze.
+     * @param position
+     *            The index position in the string to check.
+     *
+     * @return {@code true} if the position is within a JSON object, {@code false} otherwise.
+     *
+     * @see #isInString(String, int)
+     * @see #clearInObjectCache()
+    */
+    public static boolean isInObject(String line, int position) {
+        if (inObjectCache == null) inObjectCache = new HashMap<>();
+
+        // If the String is already in the cache, return the inObject value for the given position.
+        Boolean[] inObjectArr = inObjectCache.get(line);
+        if (inObjectArr != null) {
+            return inObjectArr[position];
+        }
+
+        // Otherwise, precompute the cache entry for this String and call this method again.
+        inObjectArr = new Boolean[line.length()];
+        int depth = 0;
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) == '{' && (i == 0 || !isInString(line, i)))
+                depth++;
+            else if (line.charAt(i) == '}' && (i == 0 || !isInString(line, i)))
+                depth--;
+            inObjectArr[i] = depth > 0;
+        }
+        inObjectCache.put(line, inObjectArr);
+        return isInObject(line, position);
+    }
+    private static Map<String, Boolean[]> inObjectCache;
+    public static void clearInObjectCache() { inObjectCache = null; }
 
     /**
      * Checks if the given line contains at least one unquoted occurrence of the target character.
@@ -90,7 +162,7 @@ public class StringOperations {
      * @see #isInString(String, int)
      */
     public static boolean containsUnquotedChar(String line, char target) {
-        return countUnquotedChar(line, target) > 0;
+        return findFirstUnquotedChar(line, target) != -1;
     }
 
     /**
