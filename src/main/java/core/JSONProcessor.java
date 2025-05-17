@@ -114,7 +114,7 @@ public class JSONProcessor {
             return null;
         String members = objectLine.substring(1, objectLine.length() - 1).trim();
         if (members.isEmpty())
-            return null;
+            return new ArrayList<>();
         return processMembers(members);
     }
 

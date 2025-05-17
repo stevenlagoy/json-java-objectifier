@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import core.JSONObject;
@@ -114,7 +115,7 @@ public class ProcessorTests {
     @Test
     public void testProcessObject() {
         // Test empty object
-        assertNull(JSONProcessor.processObject("{}"));
+        assertEquals(new ArrayList<>(), JSONProcessor.processObject("{}"));
 
         // Test simple object
         List<JSONObject> simple = JSONProcessor.processObject("{\"key\":\"value\"}");
