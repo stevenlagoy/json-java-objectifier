@@ -230,6 +230,15 @@ public class StringOperations {
      * @see #isInString(String, int)
      */
     public static String[] splitByUnquotedString(String string, String separator) {
+        if (splitByUnquotedCache == null) splitByUnquotedCache = new HashMap<>();
+
+        // Check if the string and separator are already in the cache.
+        String[] splitByUnquotedArr = splitByUnquotedCache.get(Map.of(string, separator));
+        if (splitByUnquotedArr != null) {
+            return splitByUnquotedArr;
+        }
+
+        // Otherwise, precompute and add result to the cache.
         List<String> parts = new ArrayList<>();
         int lastSplitIndex = 0;
 
@@ -251,8 +260,11 @@ public class StringOperations {
             parts.add(string.substring(lastSplitIndex).trim());
         }
 
+        splitByUnquotedCache.put(Map.of(string, separator), parts.toArray(new String[0]));
         return parts.toArray(new String[0]);
     }
+    private static Map<Map<String, String>, String[]> splitByUnquotedCache;
+    public static void clearSplitByUnquotedCache() { splitByUnquotedCache = null; }
 
     /**
      * Splits the input string around occurrences of the given separator string, ignoring separators that appear inside
@@ -320,6 +332,15 @@ public class StringOperations {
      * @see #isInArray(String, int)
      */
     public static String[] splitByStringNotInArray(String string, String separator) {
+        if (splitByNotInArrayCache == null) splitByNotInArrayCache = new HashMap<>();
+
+        // Check if the string and separator is already in the cache.
+        String[] splitByNotInArrayArr = splitByNotInArrayCache.get(Map.of(string, separator));
+        if (splitByNotInArrayArr != null) {
+            return splitByNotInArrayArr;
+        }
+
+        // Otherwise, precompute and add result to the cache.
         List<String> parts = new ArrayList<>();
         int lastSplitIndex = 0;
 
@@ -341,10 +362,22 @@ public class StringOperations {
             parts.add(string.substring(lastSplitIndex).trim());
         }
 
+        splitByNotInArrayCache.put(Map.of(string, separator), parts.toArray(new String[0]));
         return parts.toArray(new String[0]);
     }
+    private static Map<Map<String, String>, String[]> splitByNotInArrayCache;
+    public static void clearSplitByNotInArrayCache() { splitByNotInArrayCache = null; }
 
     public static String[] splitByStringNotInObject(String string, String separator) {
+        if (splitByNotInObjectCache == null) splitByNotInObjectCache = new HashMap<>();
+
+        // Check if the string and separator are already in the cache.
+        String[] splitByNotInObjectArr = splitByNotInObjectCache.get(Map.of(string, separator));
+        if (splitByNotInObjectArr != null) {
+            return splitByNotInObjectArr;
+        }
+
+        // Otherwise, precompute and add result to the cache.
         List<String> parts = new ArrayList<>();
         int lastSplitIndex = 0;
 
@@ -366,8 +399,11 @@ public class StringOperations {
             parts.add(string.substring(lastSplitIndex).trim());
         }
 
+        splitByNotInObjectCache.put(Map.of(string, separator), parts.toArray(new String[0]));
         return parts.toArray(new String[0]);
     }
+    private static Map<Map<String, String>, String[]> splitByNotInObjectCache;
+    public static void clearSplitByNotInObjectCache() { splitByNotInObjectCache = null; }
 
     /**
      * Splits a string by a separator only when it is not inside an object or an array.
@@ -378,6 +414,15 @@ public class StringOperations {
      * @return
      */
     public static String[] splitByStringNotNested(String string, String separator) {
+        if (splitByNotNestedCache == null) splitByNotNestedCache = new HashMap<>();
+
+        // Check if the string and separator are already in the cache.
+        String[] splitByNotNestedArr = splitByNotNestedCache.get(Map.of(string, separator));
+        if (splitByNotNestedArr != null) {
+            return splitByNotNestedArr;
+        }
+        
+        // Otherwise, precompute and add result to the cache. 
         List<String> parts = new ArrayList<>();
         int lastSplitIndex = 0;
 
@@ -399,8 +444,11 @@ public class StringOperations {
             parts.add(string.substring(lastSplitIndex).trim());
         }
 
+        splitByNotNestedCache.put(Map.of(string, separator), parts.toArray(new String[0]));
         return parts.toArray(new String[0]);
     }
+    private static Map<Map<String, String>, String[]> splitByNotNestedCache;
+    public static void clearSplitByNotNestedCache() { splitByNotNestedCache = null; }
 
     /**
      * Replaces the last occurrence of a specified regular expression with a replacement string in the input text.
