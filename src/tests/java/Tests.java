@@ -11,6 +11,17 @@ import core.JSONProcessor;
 public class Tests {
 
     @Test
+    public void testFileWithNulls() {
+        Path expectedPath = Path.of("src", "tests", "java", "data", "test7", "expected7.out");
+        Path testPath = Path.of("src", "tests", "java", "data", "test7", "test7.json");
+
+        String expected = String.join("\n", FileOperations.readFile(expectedPath));
+        String actual = JSONProcessor.processJson(testPath).toString();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testVeryLargeFile() {
 
         Path expectedPath = Path.of("src", "tests", "java", "data", "test6", "expected6.out"); 

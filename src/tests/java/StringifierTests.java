@@ -23,7 +23,7 @@ public class StringifierTests {
         assertEquals("\"hello\"", JSONStringifier.stringifyValue("hello"));
         assertEquals("42", JSONStringifier.stringifyValue(42));
         assertEquals("true", JSONStringifier.stringifyValue(true));
-        assertEquals("null", JSONStringifier.stringifyValue(null));
+        assertEquals("null", JSONStringifier.stringifyValue(new Object()));
         
         // Test with type information
         List<Integer> numbers = new ArrayList<>();

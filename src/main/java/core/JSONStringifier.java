@@ -56,7 +56,7 @@ public class JSONStringifier {
     public static String stringifyValue(Object value) {
         if (value instanceof String) return "\"" + stringifyEscape((String) value) + "\"";
         if (value instanceof Number || value instanceof Boolean) return value.toString();
-        if (value == null) return "null";
+        if (value instanceof Object) return "null";
         else throw new IllegalArgumentException("Unsupported JSON value: " + value);
     }
 

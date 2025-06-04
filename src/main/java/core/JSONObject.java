@@ -62,7 +62,7 @@ public class JSONObject implements Iterable<Object> {
             value instanceof JSONObject ||
             value instanceof List<?> ||
             value instanceof Boolean ||
-            value == null
+            value instanceof Object
         );
     }
 
