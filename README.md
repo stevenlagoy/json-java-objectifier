@@ -19,7 +19,7 @@ Add this dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.stevenlagoy</groupId>
     <artifactId>json-java-objectifier</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 
