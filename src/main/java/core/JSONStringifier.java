@@ -42,14 +42,14 @@ public class JSONStringifier {
     public static String stringifyValue(Object value, Class<?> type) {
         if (type.equals(JSONObject.class)) {
             @SuppressWarnings("unchecked") // The type of this object is known from the type parameter
-            ArrayList<JSONObject> objects = (ArrayList<JSONObject>) value;
+            List<JSONObject> objects = (List<JSONObject>) value;
             StringBuilder result = new StringBuilder();
             for (JSONObject object : objects)
                 result.append(stringifyObject(object));
             return result.toString();
         }
         if (type.equals(ArrayList.class)) {
-            return stringifyArray((ArrayList<?>) value);
+            return stringifyArray((List<?>) value);
         }
         return stringifyValue(value);
     }
@@ -76,7 +76,7 @@ public class JSONStringifier {
             sb.append("null");
         else if (type != null && type.equals(JSONObject.class)) {
             @SuppressWarnings("unchecked")
-            List<JSONObject> objects = (ArrayList<JSONObject>) value;
+            List<JSONObject> objects = (List<JSONObject>) value;
             sb.append("{");
             for (int i = 0; i < objects.size(); i++) {
                 String nested = stringifyObject(objects.get(i));
