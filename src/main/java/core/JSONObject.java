@@ -3,7 +3,6 @@ package core;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * A JSONObject is a custom data structure that represents a JSON object. It supports nested key-value pairs, arrays (as
@@ -158,19 +157,25 @@ public class JSONObject implements Iterable<Object> {
         }
     }
 
+    /** Returns the value of this JSONObject as a String, or throws a ClassCastException if unable. */
     public String getAsString() {
-        return value instanceof String ? (String) value : null;
+        if (value instanceof String) return (String) value;
+        else throw new ClassCastException("Cannot cast non-String value to String.");
     }
 
+    /** Returns the value of this JSONObject as a Number, or throws a ClassCastException if unable. */
     public Number getAsNumber() {
-        return value instanceof Number ? (Number) value : null;
+        if (value instanceof Number) return (Number) value;
+        else throw new ClassCastException("Cannot cast non-Number value to Number.");
     }
 
-    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
+    /** Returns the value of this JSONObject as a Boolean, or throws a ClassCastException if unable. */
     public Boolean getAsBoolean() {
-        return value instanceof Boolean ? (Boolean) value : null;
+        if (value instanceof Boolean) return (Boolean) value;
+        else throw new ClassCastException("Cannot cast non-Boolean value to Boolean.");
     }
 
+    /** Returns the value of this JSONObject as another JSONObject, or {@code null} if unable. */
     public JSONObject getAsObject() {
 
         if (value instanceof JSONObject) return (JSONObject) value;
@@ -182,8 +187,10 @@ public class JSONObject implements Iterable<Object> {
         return null;
     }
 
+    /** Returns the value of this JSONObject as a List, or throws a ClassCastException if unable. */
     public List<?> getAsList() {
-        return value instanceof List<?> ? (List<?>) value : null;
+        if (value instanceof List<?>) return (List<?>) value;
+        else throw new ClassCastException("Cannot cast non-List value to List.");
     }
 
     public void setValue(Object value) {
