@@ -118,7 +118,18 @@ public interface Jsonic<T extends Jsonic<T>> {
             // Only take public, non-static fields
             int modifiers = f.getModifiers();
             if (Modifier.isPublic(modifiers) && !Modifier.isStatic(modifiers)) {
-                Object value = f.get(o);
+                Object value;
+                try {
+                    value = f.get(o);
+                }
+                catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    continue;
+                }
 
                 if (value instanceof Jsonic<?> jsonic) {
                     fields.add(new JSONObject(f.getName(), jsonic.toJson()));

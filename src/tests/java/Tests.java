@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import org.junit.Test;
 
 import core.FileOperations;
-import core.JSONObject;
 import core.JSONProcessor;
 
 public class Tests {
@@ -27,13 +26,13 @@ public class Tests {
         Path expectedPath = Path.of("src", "tests", "java", "data", "test6", "expected6.out"); 
         Path testPath = Path.of("src", "tests", "java", "data", "test6", "test6.json");
 
-        long startTime = System.nanoTime();
+        // long startTime = System.nanoTime();
 
         String expected = String.join("\n", FileOperations.readFile(expectedPath));
         String actual = JSONProcessor.processJson(testPath).toString();
 
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1000000; // in miliseconds
+        // long endTime = System.nanoTime();
+        // long duration = (endTime - startTime) / 1000000; // in miliseconds
 
         assertEquals(expected, actual);
     }
