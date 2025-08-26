@@ -55,9 +55,10 @@ public class JSONStringifier {
     }
     public static String stringifyValue(Object value) {
         if (value instanceof String) return "\"" + stringifyEscape((String) value) + "\"";
-        if (value instanceof Number || value instanceof Boolean) return value.toString();
-        if (value instanceof Object) return "null";
-        else throw new IllegalArgumentException("Unsupported JSON value: " + value);
+        else if (value instanceof Number || value instanceof Boolean) return value.toString();
+        else if (value instanceof Jsonic) return ((Jsonic) value).toJson().toString();
+        else if (value.getClass() == Object.class) return "null"; // Only Object, not subclass
+        else return value.toString();
     }
 
     public static String stringifyObject(JSONObject object) {
