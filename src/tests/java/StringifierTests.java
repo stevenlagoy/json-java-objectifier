@@ -40,4 +40,25 @@ public class StringifierTests {
         assertEquals("{\"key1\" : \"value1\"}{\"key2\" : \"value2\"}", result);
     }
 
+    @Test
+    public void stringifyNestedObjects() {
+        JSONObject json = new JSONObject("root", List.of(new JSONObject("inner_1", "value 1"), new JSONObject("inner_2", "value_2")));
+        String expected = "\"root\" : {\n" +
+                          "\t\"inner_1\" : \"value 1\",\n" +
+                          "\t\"inner_2\" : \"value_2\"\n" +
+                          "}";
+        String actual = json.toString();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void stringifyNestedSingleObject() {
+        JSONObject json = new JSONObject("parent", new JSONObject("child", null));
+        String expected = "\"parent\" : {\n" +
+                          "\t\"child\" : null\n" +
+                          "}";
+        String actual = json.toString();
+        assertEquals(expected, actual);
+    }
+
 }

@@ -3,7 +3,6 @@ package core;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * A JSONObject is a custom data structure that represents a JSON object. It supports nested key-value pairs, arrays (as
@@ -57,6 +56,7 @@ public class JSONObject implements Iterable<Object> {
      */
     private static boolean isValidJsonType(Object value) {
         return (
+            value == null ||
             value instanceof String ||
             value instanceof Number ||
             value instanceof JSONObject ||
@@ -94,10 +94,8 @@ public class JSONObject implements Iterable<Object> {
     /**
      * Create a {@code JSONObject} with the given key and value.
      *
-     * @param key
-     *            A {@code String} key
-     * @param value
-     *            A valid JSON value
+     * @param key Valid {@code String} key for JSON Object
+     * @param value Valid JSON value ({@code String}, {@code Number}, {@code JSONObject}, {@code List<>}, {@code Boolean}, {@code Object extends Jsonic})
      */
     public JSONObject(String key, Object value) {
         if (!isValidJsonType(value)) {
@@ -107,11 +105,12 @@ public class JSONObject implements Iterable<Object> {
         this.value = value;
         if (value == null)
             type = null;
-        else if (value instanceof List<?>)
+        else if (value instanceof List<?>) {
             if (isJSONList(getAsList()))
                 type = JSONObject.class;
             else
                 type = ArrayList.class;
+        }
         else
             type = value.getClass();
     }
@@ -144,46 +143,51 @@ public class JSONObject implements Iterable<Object> {
     /**
      * Return the value as the given class.
      *
-     * @param clazz
-     *            An existant class to cast this object's value into.
+     * @param clazz Existant class to cast this object's value into.
      *
-     * @return The value as a type of the given class, or null if uncastable.
+     * @return Value as a type of the given class.
+     * @throws ClassCastException if the value is not null and is not assignable to the type T.
      */
-    public <T> T getValueAs(Class<T> clazz) {
-        try {
-            return clazz.cast(value);
-        } catch (ClassCastException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public <T> T getValueAs(Class<T> clazz) throws ClassCastException {
+        return clazz.cast(value);
     }
 
+    /** Returns the value of this JSONObject as a String, or throws a ClassCastException if unable. */
     public String getAsString() {
-        return value instanceof String ? (String) value : null;
+        if (value instanceof String) return (String) value;
+        else throw new ClassCastException("Cannot cast non-String value to String.");
     }
 
+    /** Returns the value of this JSONObject as a Number, or throws a ClassCastException if unable. */
     public Number getAsNumber() {
-        return value instanceof Number ? (Number) value : null;
+        if (value instanceof Number) return (Number) value;
+        else throw new ClassCastException("Cannot cast non-Number value to Number.");
     }
 
-    @SuppressFBWarnings("NP_BOOLEAN_RETURN_NULL")
+    /** Returns the value of this JSONObject as a Boolean, or throws a ClassCastException if unable. */
     public Boolean getAsBoolean() {
-        return value instanceof Boolean ? (Boolean) value : null;
+        if (value instanceof Boolean) return (Boolean) value;
+        else throw new ClassCastException("Cannot cast non-Boolean value to Boolean.");
     }
 
+    /** Returns the value of this JSONObject as another JSONObject, or {@code null} if unable. */
     public JSONObject getAsObject() {
 
-        if (value instanceof JSONObject) return (JSONObject) value;
+        return this;
 
-        if (value instanceof List<?> && type.equals(JSONObject.class)) {
-            return this;
-        }
+        // if (value instanceof JSONObject) return (JSONObject) value;
 
-        return null;
+        // if (value instanceof List<?> && type.equals(JSONObject.class)) {
+        //     return this;
+        // }
+
+        // return null;
     }
 
+    /** Returns the value of this JSONObject as a List, or throws a ClassCastException if unable. */
     public List<?> getAsList() {
-        return value instanceof List<?> ? (List<?>) value : null;
+        if (value instanceof List<?>) return (List<?>) value;
+        else throw new ClassCastException("Cannot cast non-List value to List.");
     }
 
     public void setValue(Object value) {
@@ -226,10 +230,9 @@ public class JSONObject implements Iterable<Object> {
      * Search the JSONObject tree structure for a JSONObject with the given key, and return the value of that
      * JSONObject.
      *
-     * @param key
-     *            A String key to search for within the tree structure.
+     * @param key String key to search for within the tree structure.
      *
-     * @return The value of the JSONObject with the given key, or null if unfound.
+     * @return Value of the JSONObject with the given key, or null if unfound.
      */
     public Object get(String key) {
         if (this.key.equals(key))
@@ -253,7 +256,7 @@ public class JSONObject implements Iterable<Object> {
     /**
      * Get the native type of the inner value of this JSONObject.
      *
-     * @return The class of the value (String, Number, JSONObject, List<?>, Boolean, or null)
+     * @return Class of the value (String, Number, JSONObject, List<?>, Boolean, or null)
      */
     public Class<?> getInnerType() {
         return value.getClass();
@@ -265,8 +268,7 @@ public class JSONObject implements Iterable<Object> {
      * Traverse the tree structure of this JSONObject inorder and return an indexable list of the objects' values. Start
      * with the leftmost value, then the root value, then the rightmost value, recursively.
      *
-     * @param result
-     *            A List<Object> to be populated with the values from the inorder traversal.
+     * @param result List<Object> to be populated with the values from the inorder traversal.
      */
     public void inorderTraversal(List<Object> result) {
         if (value == null) {
@@ -297,12 +299,10 @@ public class JSONObject implements Iterable<Object> {
     // Stringify methods
 
     /**
-     * Turn this JSONObject into a String representation. Should result in a functionally identical String to the JSON
-     * object which was read to create this JSONObject.
+     * Turn this JSONObject into a String representation. Will result in a functionally identical String to the theoretical JSON
+     * file which was parsed to create this JSONObject.
      *
-     * @return The String representation of this JSONObject
-     *
-     * @see JSONObject#toString(int)
+     * @return String representation of this JSONObject
      */
     @Override
     public String toString() {
@@ -317,8 +317,7 @@ public class JSONObject implements Iterable<Object> {
     /**
      * Determine whether this JSONObect is equal to the other JSONObject by comparing their String representations.
      *
-     * @param other
-     *            A JSONObject with which to compare this JSONObject
+     * @param other JSONObject with which to compare this JSONObject
      *
      * @return True if the String representations are the same, False otherwise
      *

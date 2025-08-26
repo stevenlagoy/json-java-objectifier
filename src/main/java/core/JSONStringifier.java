@@ -42,14 +42,14 @@ public class JSONStringifier {
     public static String stringifyValue(Object value, Class<?> type) {
         if (type.equals(JSONObject.class)) {
             @SuppressWarnings("unchecked") // The type of this object is known from the type parameter
-            ArrayList<JSONObject> objects = (ArrayList<JSONObject>) value;
+            List<JSONObject> objects = (List<JSONObject>) value;
             StringBuilder result = new StringBuilder();
             for (JSONObject object : objects)
                 result.append(stringifyObject(object));
             return result.toString();
         }
         if (type.equals(ArrayList.class)) {
-            return stringifyArray((ArrayList<?>) value);
+            return stringifyArray((List<?>) value);
         }
         return stringifyValue(value);
     }
@@ -74,15 +74,20 @@ public class JSONStringifier {
 
         if (value == null)
             sb.append("null");
-        else if (type != null && type.equals(JSONObject.class)) {
+        else if (type != null && type.equals(JSONObject.class) && value instanceof List) {
             @SuppressWarnings("unchecked")
-            List<JSONObject> objects = (ArrayList<JSONObject>) value;
+            List<JSONObject> objects = (List<JSONObject>) value;
             sb.append("{");
             for (int i = 0; i < objects.size(); i++) {
                 String nested = stringifyObject(objects.get(i));
                 sb.append(nested.substring(1, nested.length() - 1));
                 if (i < objects.size() - 1) sb.append(", ");
             }
+            sb.append("}");
+        }
+        else if (type != null && value instanceof JSONObject json) {
+            sb.append("{");
+            sb.append(json.toString());
             sb.append("}");
         }
         else if (type != null)
