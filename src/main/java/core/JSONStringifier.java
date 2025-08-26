@@ -74,7 +74,7 @@ public class JSONStringifier {
 
         if (value == null)
             sb.append("null");
-        else if (type != null && type.equals(JSONObject.class)) {
+        else if (type != null && type.equals(JSONObject.class) && value instanceof List) {
             @SuppressWarnings("unchecked")
             List<JSONObject> objects = (List<JSONObject>) value;
             sb.append("{");
@@ -83,6 +83,11 @@ public class JSONStringifier {
                 sb.append(nested.substring(1, nested.length() - 1));
                 if (i < objects.size() - 1) sb.append(", ");
             }
+            sb.append("}");
+        }
+        else if (type != null && value instanceof JSONObject json) {
+            sb.append("{");
+            sb.append(json.toString());
             sb.append("}");
         }
         else if (type != null)

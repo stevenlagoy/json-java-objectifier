@@ -56,6 +56,7 @@ public class JSONObject implements Iterable<Object> {
      */
     private static boolean isValidJsonType(Object value) {
         return (
+            value == null ||
             value instanceof String ||
             value instanceof Number ||
             value instanceof JSONObject ||
@@ -172,13 +173,15 @@ public class JSONObject implements Iterable<Object> {
     /** Returns the value of this JSONObject as another JSONObject, or {@code null} if unable. */
     public JSONObject getAsObject() {
 
-        if (value instanceof JSONObject) return (JSONObject) value;
+        return this;
 
-        if (value instanceof List<?> && type.equals(JSONObject.class)) {
-            return this;
-        }
+        // if (value instanceof JSONObject) return (JSONObject) value;
 
-        return null;
+        // if (value instanceof List<?> && type.equals(JSONObject.class)) {
+        //     return this;
+        // }
+
+        // return null;
     }
 
     /** Returns the value of this JSONObject as a List, or throws a ClassCastException if unable. */
